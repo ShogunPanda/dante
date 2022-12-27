@@ -14,7 +14,7 @@ const templates = {
   'src/build/cli.ts': 'cli.ts',
   'src/build/index.ts': 'index.ts',
   'src/styling/unocss.config.ts': 'unocss.config.ts',
-  'src/templates/index.tsx': 'index.tsx',
+  'src/templates/index.html.tsx': 'index.tsx',
   '.eslintrc.json': 'eslintrc.json',
   'package.json': 'package.json',
   'prettier.config.cjs': 'prettier.config.cjs',

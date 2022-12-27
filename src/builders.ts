@@ -3,13 +3,10 @@ import glob from 'glob'
 import { spawn } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { Worker } from 'node:worker_threads'
 import pino from 'pino'
 import { BuildContext, finalizePage } from './css.js'
-import { rootDir } from './models.js'
-
-const swc = fileURLToPath(new URL('../node_modules/.bin/swc', import.meta.url))
+import { rootDir, swc } from './models.js'
 
 export function developmentBuilder(logger: pino.Logger): Promise<void> {
   let compiling = false
@@ -76,7 +73,9 @@ export function developmentBuilder(logger: pino.Logger): Promise<void> {
     persistent: true
   })
 
-  process.on('SIGINT', () => watcher.close().then(success))
+  process.on('SIGINT', () => {
+    watcher.close().then(success).catch(fail)
+  })
 
   watcher.on('add', scheduleRun).on('change', scheduleRun).on('unlink', scheduleRun).on('error', fail!)
   return promise

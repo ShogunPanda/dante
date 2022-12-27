@@ -3,7 +3,7 @@
   "parserOptions": {
     "project": "tsconfig.json"
   },
-  "extends": ["@cowtech/eslint-config/react-with-typescript"],
+  "extends": ["@cowtech/eslint-config/typescript"],
   "overrides": [
     {
       "files": ["*.js"],

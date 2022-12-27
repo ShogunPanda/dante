@@ -7,7 +7,7 @@ import { mkdir, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
-import { rootDir } from './models.js'
+import { rootDir, swc } from './models.js'
 
 function compileSourceCode(): Promise<void> {
   let success: () => void
@@ -18,7 +18,7 @@ function compileSourceCode(): Promise<void> {
     fail = reject
   })
 
-  const compilation = spawn(fileURLToPath(new URL('../node_modules/.bin/swc', import.meta.url)), ['-d', 'tmp', 'src'])
+  const compilation = spawn(swc, ['-d', 'tmp', 'src'])
   let error = Buffer.alloc(0)
 
   compilation.stderr.on('data', chunk => {
