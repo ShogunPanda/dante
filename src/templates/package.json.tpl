@@ -39,7 +39,7 @@
     "@unocss/preset-wind": "^0.47.5",
     "@unocss/transformer-directives": "^0.47.5",
     "commander": "^9.4.1",
-    "dante": "@VERSION@",
+    "dante": "^@VERSION@",
     "pino": "^8.8.0",
     "prettier": "^2.5.1"
   }
