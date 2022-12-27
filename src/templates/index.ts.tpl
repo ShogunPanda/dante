@@ -42,6 +42,10 @@ export async function build(
   const context: BuildContext = createBuildContext(isProduction, safelist)
   await createFile(baseDir, 'index.html', () => page(context), 'utf8')
 
+  if (!isProduction) {
+    await createFile(baseDir, 'style.css', () => createStylesheet(context.cssClasses, false), 'utf8')
+  }
+
   if (typeof after === 'function') {
     await after(context)
   }
