@@ -1,3 +1,7 @@
+### 2022-12-28 / 0.2.3
+
+- fix: Added missing file.
+
 ### 2022-12-28 / 0.2.2
 
 - fix: Bugfix.
