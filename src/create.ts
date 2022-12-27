@@ -19,7 +19,7 @@ const templates = {
   'package.json': 'package.json',
   'prettier.config.cjs': 'prettier.config.cjs',
   'tsconfig.json': 'tsconfig.json',
-  '.swcrc': 'swcrc.tpl'
+  '.swcrc': 'swcrc'
 }
 
 function compile(template: string, variables: Record<string, string>): string {
@@ -72,7 +72,7 @@ export async function initializeSite(name: string, directory: string): Promise<v
       fileURLToPath(new URL(`../dist/templates/${templateFile}.tpl`, import.meta.url)),
       'utf8'
     )
-    await writeFile(destination, compile(template.trim(), variables), 'utf8')
+    await writeFile(destination, compile(template, variables), 'utf8')
   }
 }
 
