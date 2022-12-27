@@ -18,7 +18,8 @@ const templates = {
   '.eslintrc.json': 'eslintrc.json',
   'package.json': 'package.json',
   'prettier.config.cjs': 'prettier.config.cjs',
-  'tsconfig.json': 'tsconfig.json'
+  'tsconfig.json': 'tsconfig.json',
+  '.swcrc': 'swcrc.tpl'
 }
 
 function compile(template: string, variables: Record<string, string>): string {
