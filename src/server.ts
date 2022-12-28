@@ -1,4 +1,3 @@
-#!/usr/bin/env node --no-warnings=loader --loader ts-node/esm/transpile-only
 import fastifyStatic from '@fastify/static'
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { existsSync } from 'node:fs'
