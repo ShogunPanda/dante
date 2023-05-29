@@ -1,13 +1,21 @@
-import { existsSync } from 'node:fs'
+import { glob } from 'glob'
 import { resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 export type Mode = 'development' | 'production'
 
 export const rootDir = process.cwd()
+let swc: string
 
-export let swc = resolve(rootDir, 'node_modules/.bin/swc')
+export async function resolveSwc(): Promise<string> {
+  const location = await glob(resolve(rootDir, 'node_modules/**/@swc/cli/bin/swc.js'), {
+    follow: true,
+    dot: true
+  })
 
-if (!existsSync(swc)) {
-  swc = fileURLToPath(new URL('../node_modules/.bin/swc', import.meta.url))
+  if (!location.length) {
+    throw new Error('Cannot find swc.')
+  }
+
+  swc = location[0]
+  return swc
 }

@@ -1,46 +1,13 @@
 #!/usr/bin/env node
 
 import { Command, program } from 'commander'
-import { spawn } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
-import { rootDir, swc } from './models.js'
-
-function compileSourceCode(): Promise<void> {
-  let success: () => void
-  let fail: (reason?: Error) => void
-
-  const promise = new Promise<void>((resolve, reject) => {
-    success = resolve
-    fail = reject
-  })
-
-  const compilation = spawn(swc, ['-d', 'tmp', 'src'])
-  let error = Buffer.alloc(0)
-
-  compilation.stderr.on('data', chunk => {
-    error = Buffer.concat([error, chunk])
-  })
-
-  compilation.on('close', code => {
-    if (code !== 0) {
-      const errorString = error
-        .toString()
-        .trim()
-        .replaceAll(/(^.)/gm, '$1'.padStart(17, ' '))
-        .replaceAll(rootDir, '$ROOT')
-
-      fail(new Error('Code compilation failed:\n\n  ' + errorString + '\n'))
-    }
-
-    success()
-  })
-
-  return promise
-}
+import { compileSourceCode } from './builders.js'
+import { rootDir } from './models.js'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
@@ -67,7 +34,7 @@ program
 program
   .command('development')
   .description('Starts the development builder')
-  .option('-i, --ip <ip>', 'The IP to listen on', '0.0.0.0')
+  .option('-i, --ip <ip>', 'The IP to listen on', '::')
   .option('-p, --port <port>', 'The port to listen on', v => Number.parseInt(v, 10), 4200)
   .alias('dev')
   .alias('d')
@@ -82,7 +49,8 @@ program
 
       const { ip, port } = this.optsWithGlobals()
 
-      await Promise.all([developmentBuilder(logger), localServer(ip, port, logger)])
+      await localServer(ip, port, logger, true)
+      await developmentBuilder(logger)
     } catch (error) {
       logger.error(error)
       process.exit(1)
@@ -116,7 +84,7 @@ program
       const { localServer } = await import('./server.js')
 
       const { ip, port } = this.optsWithGlobals()
-      await localServer(ip, port)
+      await localServer(ip, port, pino({ level: process.env.LOG_LEVEL ?? 'info' }))
     } catch (error) {
       logger.error(error)
       process.exit(1)

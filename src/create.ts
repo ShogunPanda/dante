@@ -16,10 +16,10 @@ const templates = {
   'src/styling/unocss.config.ts': 'unocss.config.ts',
   'src/templates/index.html.tsx': 'index.tsx',
   '.eslintrc.json': 'eslintrc.json',
+  '.swcrc': 'swcrc',
   'package.json': 'package.json',
   'prettier.config.cjs': 'prettier.config.cjs',
-  'tsconfig.json': 'tsconfig.json',
-  '.swcrc': 'swcrc'
+  'tsconfig.json': 'tsconfig.json'
 }
 
 function compile(template: string, variables: Record<string, string>): string {
