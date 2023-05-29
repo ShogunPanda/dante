@@ -165,7 +165,7 @@ export async function productionBuilder(): Promise<void> {
   )
 
   // First of all create the site
-  await rm(resolve(rootDir, 'dist'), { recursive: true })
+  await rm(resolve(rootDir, 'dist'), { force: true, recursive: true })
   await mkdir(resolve(rootDir, 'dist'), { recursive: true })
 
   if (!isMainThread) {
