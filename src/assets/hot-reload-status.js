@@ -1,5 +1,3 @@
-/* globals Pusher */
-
 {
   const pendingMessage = document.querySelector('#pending')
   const errorContainer = document.querySelector('#error')

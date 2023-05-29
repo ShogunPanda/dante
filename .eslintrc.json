@@ -11,6 +11,9 @@
       "parserOptions": {
         "ecmaVersion": 2020
       },
+      "env": {
+        "browser": true
+      },
       "extends": ["@cowtech/eslint-config"],
       "rules": {
         "@typescript-eslint/typedef": 0,
