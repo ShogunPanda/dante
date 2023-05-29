@@ -1,3 +1,8 @@
+### 2023-05-29 / 0.3.0
+
+- feat: Added hot-reload.
+- chore: Removed leftovers.
+
 ### 2022-12-28 / 0.2.7
 
 
