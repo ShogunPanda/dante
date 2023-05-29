@@ -1,3 +1,7 @@
+### 2023-05-29 / 0.5.0
+
+- fix: Removed useless dependency.
+
 ### 2023-05-29 / 0.4.0
 
 - fix: Fixed status style.
