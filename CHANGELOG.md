@@ -1,3 +1,7 @@
+### 2023-05-29 / 0.4.0
+
+- fix: Fixed status style.
+
 ### 2023-05-29 / 0.3.0
 
 - feat: Added hot-reload.
