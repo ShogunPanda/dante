@@ -1,3 +1,7 @@
+### 2023-10-09 / 0.6.1
+
+- fix: Fixed compressor.
+
 ### 2023-10-09 / 0.6.0
 
 - feat: Updated dependencies.
