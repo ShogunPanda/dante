@@ -220,17 +220,30 @@ export async function finalizePage(contents: string, stylesheet: string, safelis
           return
         }
 
-        const [klass, modifier] = decl.selector.slice(1).split(/(:(hover|focus|visited|active|link))/)
+        const newSelector: string[] = []
+        for (const selector of decl.selector.split(/\s*,\s*/).map(s => s.trim())) {
+          const [klass, modifier] = selector.slice(1).split(':')
 
-        if (safelist.includes(klass)) {
-          return
+          if (safelist.includes(klass)) {
+            newSelector.push(selector)
+            continue
+          }
+
+          const replacement = compressedMap.get(klass.replaceAll('\\', ''))
+
+          if (replacement) {
+            if (modifier) {
+              newSelector.push(`.${replacement}:${modifier}`)
+            } else {
+              newSelector.push(`.${replacement}`)
+            }
+          } else {
+            decl.remove()
+          }
         }
 
-        const replacement = compressedMap.get(klass.replaceAll('\\', ''))
-
-        if (replacement) {
-          const newSelector = ['.', replacement, modifier].filter(Boolean).join('')
-          decl.selector = newSelector
+        if (newSelector.length) {
+          decl.selector = newSelector.join(',')
         } else {
           decl.remove()
         }

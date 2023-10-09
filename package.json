@@ -35,7 +35,7 @@
     "build": "swc -d dist src",
     "postbuild": "tsc -p . --emitDeclarationOnly",
     "format": "prettier -w src",
-    "lint": "eslint src",
+    "lint": "eslint --ext .ts,.tsx src",
     "ci": "npm run lint",
     "prepublishOnly": "npm run ci",
     "postpublish": "git push origin && git push origin -f --tags"
@@ -73,6 +73,6 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": ">= 16.0.0"
+    "node": ">= 18.18.0"
   }
 }
