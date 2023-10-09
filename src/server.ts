@@ -1,12 +1,12 @@
 import fastifyStatic from '@fastify/static'
-import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { BAD_REQUEST, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
 import EventEmitter from 'node:events'
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
-import pino from 'pino'
+import type pino from 'pino'
 import { rootDir } from './models.js'
 
 interface BuildStatus {

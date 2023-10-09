@@ -7,8 +7,8 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Worker, isMainThread } from 'node:worker_threads'
-import pino from 'pino'
-import { BuildContext, finalizePage } from './css.js'
+import type pino from 'pino'
+import { finalizePage, type BuildContext } from './css.js'
 import { resolveSwc, rootDir } from './models.js'
 import { notifyBuildStatus } from './server.js'
 
@@ -155,7 +155,7 @@ export async function developmentBuilder(logger: pino.Logger): Promise<void> {
   return promise
 }
 
-export async function productionBuilder(): Promise<void> {
+export async function productionBuilder(output: string = 'dist'): Promise<void> {
   if (!existsSync(resolve(rootDir, './tmp')) || isMainThread) {
     await compileSourceCode()
   }
@@ -165,8 +165,9 @@ export async function productionBuilder(): Promise<void> {
   )
 
   // First of all create the site
-  await rm(resolve(rootDir, 'dist'), { force: true, recursive: true })
-  await mkdir(resolve(rootDir, 'dist'), { recursive: true })
+  const fullOutput = resolve(rootDir, output)
+  await rm(fullOutput, { force: true, recursive: true })
+  await mkdir(fullOutput, { recursive: true })
 
   if (!isMainThread) {
     await writeFile(resolve(rootDir, 'tmp', '__status.html'), await generateHotReloadPage(), 'utf8')
@@ -178,7 +179,7 @@ export async function productionBuilder(): Promise<void> {
     const stylesheet: string = await createStylesheet(context.cssClasses, true)
 
     // Now, for each generated page, replace the @import class with the production CSS
-    const pages = await glob(resolve(rootDir, 'dist', '**/*.html'))
+    const pages = await glob(resolve(fullOutput, '**/*.html'))
     for (const page of pages) {
       let finalized = await finalizePage(await readFile(page, 'utf8'), stylesheet, safelist)
 

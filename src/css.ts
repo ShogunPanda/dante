@@ -1,8 +1,8 @@
-import { createGenerator, UserConfig } from '@unocss/core'
+import { createGenerator, type UserConfig } from '@unocss/core'
 import { transformDirectives } from '@unocss/transformer-directives'
-import { Element } from 'hast'
+import { type Element } from 'hast'
 import MagicString from 'magic-string'
-import postcss, { Rule } from 'postcss'
+import postcss, { type Rule } from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
 import postcssImport from 'postcss-import'
 import postcssMinifySelector from 'postcss-minify-selectors'
@@ -11,9 +11,10 @@ import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
 import { PurgeCSS } from 'purgecss'
 import { rehype } from 'rehype'
 import stringify from 'rehype-stringify'
-import { Plugin } from 'unified'
+import { type Transformer } from 'unified'
+import { type Node } from 'unist'
 import { visit } from 'unist-util-visit'
-import { VFile } from 'vfile'
+import { type VFile } from 'vfile'
 
 interface CompressCSSClassesPluginOptions {
   safelist?: string[]
@@ -59,8 +60,8 @@ function cssClass(context: CSSClassGeneratorContext): void {
   } while (cssForbiddenClasses.has(context.name))
 }
 
-function extractCSSClassesPlugin(): Plugin {
-  return (tree, file: VFile) => {
+function extractCSSClassesPlugin(_a: object): Transformer {
+  return (tree: Node, file: VFile) => {
     const classes = new Set<string>()
     const compressedClasses = new Map<string, string>()
 
@@ -75,10 +76,10 @@ function extractCSSClassesPlugin(): Plugin {
   }
 }
 
-function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {}): Plugin {
+function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {}): Transformer {
   const safelist = new Set(options.safelist ?? [])
 
-  return (tree, file: VFile) => {
+  return (tree: Node, file: VFile) => {
     const classGenerationContext: CSSClassGeneratorContext = { name: '', counter: 0 }
     const classes = new Set<string>()
     const compressedClasses = new Map<string, string>()
@@ -106,7 +107,7 @@ function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {})
       }
 
       if (klasses.length) {
-        node.properties!.className = klasses
+        node.properties.className = klasses
       }
     })
   }
@@ -175,7 +176,7 @@ export function createBuildContext(isProduction: boolean, safelist: string[]): B
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
   // First of all, extract classes and put them into the big list, which will only be processed once
-  const parsedContents = await rehype().use(extractCSSClassesPlugin).process(contents)
+  const parsedContents = await rehype().use(extractCSSClassesPlugin, {}).process(contents)
   const allClasses = parsedContents.data.classes as Set<string>
 
   for (const klass of allClasses) {
@@ -206,11 +207,7 @@ export async function finalizePage(contents: string, stylesheet: string, safelis
   const css = await purgeCss(contents, stylesheet)
 
   // First of all, replace all classes with their compressed version
-  const compressedContents = await rehype()
-    .use(compressCSSClassesPlugin, { safelist })
-    // @ts-expect-error
-    .use(stringify)
-    .process(contents)
+  const compressedContents = await rehype().use(compressCSSClassesPlugin, { safelist }).use(stringify).process(contents)
 
   const compressedMap = compressedContents.data.compression as Map<string, string>
 
