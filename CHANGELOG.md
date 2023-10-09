@@ -1,3 +1,8 @@
+### 2023-10-09 / 0.6.0
+
+- feat: Updated dependencies.
+- chore: Fixed compilation.
+
 ### 2023-05-29 / 0.5.3
 
 
