@@ -1,3 +1,7 @@
+### 2023-10-11 / 0.8.0
+
+- feat: Added CSS expansion utilities.
+
 ### 2023-10-11 / 0.7.1
 
 - fix: Minor fix.
