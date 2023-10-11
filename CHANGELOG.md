@@ -1,3 +1,7 @@
+### 2023-10-11 / 0.7.1
+
+- fix: Minor fix.
+
 ### 2023-10-11 / 0.7.0
 
 - feat: Allow to keep CSS classes if needed.
