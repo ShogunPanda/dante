@@ -249,14 +249,13 @@ export function expandClasses(classes: ClassesExpansions, klasses: string): stri
   // For each input class
   return klasses
     .split(' ')
-    .map(klass => {
+    .flatMap(klass => {
       if (!classes[klass]) {
         return klass
       }
 
       return [...classes[klass]]
     })
-    .flat(-1)
     .join(' ')
 }
 
