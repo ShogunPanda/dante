@@ -1,6 +1,6 @@
 {
   "name": "dante",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Opinionated static site generator.",
   "homepage": "https://sw.cowtech.it/dante",
   "repository": "github:ShogunPanda/dante",
