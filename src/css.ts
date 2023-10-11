@@ -31,9 +31,12 @@ type CSSImporter = (id: string) => Promise<string | null>
 export interface BuildContext {
   isProduction: boolean
   cssClasses: Set<string>
-  keepExpandedCss: boolean
   safelist: string[]
+  keepExpandedCss: boolean
+  removeUnusedCss: boolean
 }
+
+export type ClassesExpansions = Record<string, Set<string>>
 
 const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
 const cssClassAlphabetLength = cssClassAlphabet.length
@@ -172,8 +175,93 @@ export async function purgeCss(html: string, css: string): Promise<string> {
   return result[0].css
 }
 
+export async function loadClassesExpansion(css: string): Promise<ClassesExpansions> {
+  // Load classes from the classes file
+  const classes: Record<string, Set<string>> = {}
+
+  // Load PostCSS with only the nested plugin enabled
+  await postcss([
+    postcssNested(),
+    {
+      postcssPlugin: 'dante.classes-expansion',
+      Rule(decl: Rule) {
+        // If not a class selector, ignore it
+        if (!decl.selector.startsWith('.')) {
+          return
+        }
+
+        // For each rule, only retain @apply ones
+        const rules = []
+        for (const node of decl.nodes) {
+          if (node.type === 'atrule' && node.name === 'apply') {
+            rules.push(node.params)
+          }
+        }
+
+        // Now build the expansions for the global rule
+        const localClasses: ClassesExpansions = {}
+
+        // For each selector of this rule
+        for (const selector of decl.selectors) {
+          // Split modifiers
+          const [klass, ...modifiers] = selector.slice(1).split(':')
+
+          if (!localClasses[klass]) {
+            localClasses[klass] = new Set()
+          }
+
+          // No modifier, just set the rule untouch
+          if (!modifiers.length) {
+            for (const rule of rules) {
+              localClasses[klass].add(rule)
+            }
+          } else {
+            // For each modifier, apply the rule with the modifier as prefix
+            for (const modifier of modifiers) {
+              for (const rule of rules) {
+                localClasses[klass].add([modifier, rule].filter(Boolean).join('-'))
+              }
+            }
+          }
+        }
+
+        // Merge local classes with global one
+        for (const [from, tos] of Object.entries(localClasses)) {
+          if (!classes[from]) {
+            classes[from] = new Set()
+          }
+
+          for (const to of tos) {
+            classes[from].add(to)
+          }
+        }
+      }
+    }
+  ]).process(css, {
+    from: 'input.css',
+    to: 'output.css'
+  })
+
+  return classes
+}
+
+export function expandClasses(classes: ClassesExpansions, klasses: string): string {
+  // For each input class
+  return klasses
+    .split(' ')
+    .map(klass => {
+      if (!classes[klass]) {
+        return klass
+      }
+
+      return [...classes[klass]]
+    })
+    .flat(-1)
+    .join(' ')
+}
+
 export function createBuildContext(isProduction: boolean, safelist: string[]): BuildContext {
-  return { isProduction, cssClasses: new Set(), safelist, keepExpandedCss: false }
+  return { isProduction, cssClasses: new Set(), safelist, keepExpandedCss: false, removeUnusedCss: true }
 }
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
@@ -211,7 +299,7 @@ export async function finalizePage(
   stylesheet: string,
   safelist: string[] = []
 ): Promise<string> {
-  const css = await purgeCss(contents, stylesheet)
+  const css = context.removeUnusedCss ? await purgeCss(contents, stylesheet) : stylesheet
 
   // First of all, replace all classes with their compressed version
   let pipeline = rehype()
