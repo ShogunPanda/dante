@@ -181,7 +181,7 @@ export async function productionBuilder(output: string = 'dist'): Promise<void> 
     // Now, for each generated page, replace the @import class with the production CSS
     const pages = await glob(resolve(fullOutput, '**/*.html'))
     for (const page of pages) {
-      let finalized = await finalizePage(await readFile(page, 'utf8'), stylesheet, safelist)
+      let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, safelist)
 
       if (!isMainThread) {
         finalized = finalized.replace('</body>', `<script type="text/javascript">${client.code}</script></body>`)

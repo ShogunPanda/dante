@@ -1,6 +1,6 @@
 import { createGenerator, type UserConfig } from '@unocss/core'
 import { transformDirectives } from '@unocss/transformer-directives'
-import { type Element } from 'hast'
+import { type Element, type Root } from 'hast'
 import MagicString from 'magic-string'
 import postcss, { type Rule } from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
@@ -11,7 +11,7 @@ import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
 import { PurgeCSS } from 'purgecss'
 import { rehype } from 'rehype'
 import stringify from 'rehype-stringify'
-import { type Transformer } from 'unified'
+import { type Processor, type Transformer } from 'unified'
 import { type Node } from 'unist'
 import { visit } from 'unist-util-visit'
 import { type VFile } from 'vfile'
@@ -25,11 +25,13 @@ interface CSSClassGeneratorContext {
   counter: number
 }
 
+type Rehype = Processor<Root, undefined, undefined, Root, string>
 type CSSImporter = (id: string) => Promise<string | null>
 
 export interface BuildContext {
   isProduction: boolean
   cssClasses: Set<string>
+  keepExpandedCss: boolean
   safelist: string[]
 }
 
@@ -171,7 +173,7 @@ export async function purgeCss(html: string, css: string): Promise<string> {
 }
 
 export function createBuildContext(isProduction: boolean, safelist: string[]): BuildContext {
-  return { isProduction, cssClasses: new Set(), safelist }
+  return { isProduction, cssClasses: new Set(), safelist, keepExpandedCss: false }
 }
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
@@ -203,17 +205,30 @@ export async function createStylesheet(
 }
 
 // Compress each CSS class in the contents, then purged the CSS and finally replace the placeholder
-export async function finalizePage(contents: string, stylesheet: string, safelist: string[] = []): Promise<string> {
+export async function finalizePage(
+  context: BuildContext,
+  contents: string,
+  stylesheet: string,
+  safelist: string[] = []
+): Promise<string> {
   const css = await purgeCss(contents, stylesheet)
 
   // First of all, replace all classes with their compressed version
-  const compressedContents = await rehype().use(compressCSSClassesPlugin, { safelist }).use(stringify).process(contents)
+  let pipeline = rehype()
+
+  if (!context.keepExpandedCss) {
+    pipeline = pipeline.use(compressCSSClassesPlugin, { safelist }) as unknown as Rehype
+  }
+
+  const compressedContents = await pipeline.use(stringify).process(contents)
 
   const compressedMap = compressedContents.data.compression as Map<string, string>
 
   // Now grab the CSS and replace the same classes again
-  const compressedCss = await postcss([
-    {
+  const postCssRules = []
+
+  if (!context.keepExpandedCss) {
+    postCssRules.push({
       postcssPlugin: 'dante.compressor',
       Rule(decl: Rule) {
         if (!decl.selector.startsWith('.')) {
@@ -248,8 +263,10 @@ export async function finalizePage(contents: string, stylesheet: string, safelis
           decl.remove()
         }
       }
-    }
-  ]).process(css, {
+    })
+  }
+
+  const compressedCss = await postcss().process(css, {
     from: 'input.css',
     to: 'output.css'
   })
