@@ -266,7 +266,7 @@ export async function finalizePage(
     })
   }
 
-  const compressedCss = await postcss().process(css, {
+  const compressedCss = await postcss(postCssRules).process(css, {
     from: 'input.css',
     to: 'output.css'
   })
