@@ -1,3 +1,7 @@
+### 2023-10-11 / 0.8.2
+
+- fix: Better purge regexp.
+
 ### 2023-10-11 / 0.8.1
 
 - fix: Minor fix.
