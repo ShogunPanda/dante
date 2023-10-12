@@ -9,7 +9,7 @@
   "extends": ["@cowtech/eslint-config"],
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": ["*.ts", ".tsx"],
       "env": {
         "node": true,
         "browser": false
