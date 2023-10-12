@@ -1,3 +1,7 @@
+### 2023-10-12 / 0.9.0
+
+- feat: Updated template file.
+
 ### 2023-10-11 / 0.8.2
 
 - fix: Better purge regexp.
