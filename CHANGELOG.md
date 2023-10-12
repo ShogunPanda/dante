@@ -1,3 +1,7 @@
+### 2023-10-12 / 0.10.0
+
+- fix: Updated template.
+
 ### 2023-10-12 / 0.9.0
 
 - feat: Updated template file.
