@@ -14,6 +14,22 @@ interface BuildStatus {
   payload?: object
 }
 
+interface ServerOptions {
+  ip: string
+  port: number
+  logger: pino.Logger | false
+  development?: boolean
+  staticDir: string
+}
+
+const defaultServerOptions: ServerOptions = {
+  ip: '::',
+  port: 0,
+  logger: false,
+  development: false,
+  staticDir: 'dist/html'
+}
+
 class SynchronizationEventEmitter extends EventEmitter {
   public closed: boolean
 
@@ -79,12 +95,9 @@ function syncHandler(this: FastifyInstance, _: FastifyRequest, reply: FastifyRep
   setTimeout(() => buildEmitter.emit('update'), 100)
 }
 
-export async function localServer(
-  ip: string,
-  port: number,
-  logger?: pino.Logger,
-  development?: boolean
-): Promise<FastifyInstance> {
+export async function localServer(options?: Partial<ServerOptions>): Promise<FastifyInstance> {
+  const { ip, port, logger, staticDir, development } = { ...defaultServerOptions, ...options }
+
   const https = existsSync(resolve(rootDir, 'ssl'))
     ? {
         key: await readFile(resolve(rootDir, 'ssl/privkey.pem')),
@@ -100,7 +113,7 @@ export async function localServer(
   })
 
   await server.register(fastifyStatic, {
-    root: resolve(rootDir, 'dist'),
+    root: resolve(rootDir, staticDir),
     decorateReply: true
   })
 

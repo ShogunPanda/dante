@@ -36,6 +36,7 @@ program
 program
   .command('development')
   .description('Starts the development builder')
+  .option('-d, --directory <dir>', 'The directory to server files from', 'dist')
   .option('-i, --ip <ip>', 'The IP to listen on', '::')
   .option('-p, --port <port>', 'The port to listen on', (v: string) => Number.parseInt(v, 10), 4200)
   .alias('dev')
@@ -45,9 +46,9 @@ program
       const { localServer } = await import('./server.js')
       const { developmentBuilder } = await import('./builders.js')
 
-      const { ip, port } = this.optsWithGlobals()
+      const { ip, port, directory: staticDir } = this.optsWithGlobals()
 
-      await localServer(ip, port, logger, true)
+      await localServer({ ip, port, logger, development: true, staticDir })
       await developmentBuilder(logger)
     } catch (error) {
       logger.error(error)
@@ -73,6 +74,7 @@ program
 program
   .command('server')
   .description('Serves the site locally')
+  .option('-d, --directory <dir>', 'The directory to server files from', 'dist')
   .option('-i, --ip <ip>', 'The IP to listen on', '0.0.0.0')
   .option('-p, --port <port>', 'The port to listen on', (v: string) => Number.parseInt(v, 10), 4200)
   .alias('serve')
@@ -81,8 +83,14 @@ program
     try {
       const { localServer } = await import('./server.js')
 
-      const { ip, port } = this.optsWithGlobals()
-      await localServer(ip, port, pino({ level: process.env.LOG_LEVEL ?? 'info' }))
+      const { ip, port, directory: staticDir } = this.optsWithGlobals()
+      await localServer({
+        ip,
+        port,
+        logger: pino({ level: process.env.LOG_LEVEL ?? 'info' }),
+        development: false,
+        staticDir
+      })
     } catch (error) {
       logger.error(error)
       process.exit(1)
