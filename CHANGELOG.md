@@ -1,3 +1,7 @@
+### 2023-10-13 / 0.11.1
+
+- fix: Do not use Sets.
+
 ### 2023-10-13 / 0.11.0
 
 - feat: Added static directory option to server.
