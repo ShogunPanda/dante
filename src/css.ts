@@ -36,7 +36,8 @@ export interface BuildContext {
   removeUnusedCss: boolean
 }
 
-export type ClassesExpansions = Record<string, Set<string>>
+type InternalClassesExpansions = Record<string, Set<string>>
+export type ClassesExpansions = Record<string, string[]>
 
 const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
 const cssClassAlphabetLength = cssClassAlphabet.length
@@ -177,7 +178,7 @@ export async function purgeCss(html: string, css: string): Promise<string> {
 
 export async function loadClassesExpansion(css: string): Promise<ClassesExpansions> {
   // Load classes from the classes file
-  const classes: Record<string, Set<string>> = {}
+  const unserializedClass: InternalClassesExpansions = {}
 
   // Load PostCSS with only the nested plugin enabled
   await postcss([
@@ -199,7 +200,7 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
         }
 
         // Now build the expansions for the global rule
-        const localClasses: ClassesExpansions = {}
+        const localClasses: InternalClassesExpansions = {}
 
         // For each selector of this rule
         for (const selector of decl.selectors) {
@@ -227,12 +228,12 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
 
         // Merge local classes with global one
         for (const [from, tos] of Object.entries(localClasses)) {
-          if (!classes[from]) {
-            classes[from] = new Set()
+          if (!unserializedClass[from]) {
+            unserializedClass[from] = new Set()
           }
 
           for (const to of tos) {
-            classes[from].add(to)
+            unserializedClass[from].add(to)
           }
         }
       }
@@ -241,6 +242,12 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
     from: 'input.css',
     to: 'output.css'
   })
+
+  const classes: ClassesExpansions = {}
+
+  for (const [compressed, expanded] of Object.entries(unserializedClass)) {
+    classes[compressed] = [...expanded]
+  }
 
   return classes
 }
@@ -254,7 +261,7 @@ export function expandClasses(classes: ClassesExpansions, klasses: string): stri
         return klass
       }
 
-      return [...classes[klass]]
+      return classes[klass]
     })
     .join(' ')
 }
