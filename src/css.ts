@@ -34,6 +34,7 @@ export interface BuildContext {
   safelist: string[]
   keepExpandedCss: boolean
   removeUnusedCss: boolean
+  extensions?: any
 }
 
 type InternalClassesExpansions = Record<string, Set<string>>

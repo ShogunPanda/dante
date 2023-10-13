@@ -154,7 +154,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
         return
       }
 
-      resolve(server)
+      resolve(server as unknown as FastifyInstance)
     })
   })
 }

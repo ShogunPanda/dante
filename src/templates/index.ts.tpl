@@ -7,10 +7,10 @@ import { page } from '../templates/index.html.js'
 
 export const safelist = []
 
-export function createStylesheet(cssClasses: Set<string>, minify: boolean): Promise<string> {
+export function createStylesheet(context: BuildContext, minify: boolean): Promise<string> {
   return createCSS(
     cssConfig,
-    cssClasses,
+    context.cssClasses,
     minify,
     (id: string) => {
       return null
@@ -43,7 +43,7 @@ export async function build(
   await createFile(baseDir, 'index.html', () => page(context), 'utf8')
 
   if (!isProduction) {
-    await createFile(baseDir, 'style.css', () => createStylesheet(context.cssClasses, false), 'utf8')
+    await createFile(baseDir, 'style.css', () => createStylesheet(context, false), 'utf8')
   }
 
   if (typeof after === 'function') {

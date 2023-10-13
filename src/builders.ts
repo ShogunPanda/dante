@@ -176,7 +176,7 @@ export async function productionBuilder(output: string = 'dist'): Promise<void> 
   const { build, createStylesheet, safelist } = await import(resolve(rootDir, 'tmp/build/index.js'))
 
   await build(isMainThread ? 'production' : 'development', async (context: BuildContext) => {
-    const stylesheet: string = await createStylesheet(context.cssClasses, true)
+    const stylesheet: string = await createStylesheet(context, true)
 
     // Now, for each generated page, replace the @import class with the production CSS
     const pages = await glob(resolve(fullOutput, '**/*.html'))
