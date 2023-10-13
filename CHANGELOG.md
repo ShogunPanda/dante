@@ -1,3 +1,7 @@
+### 2023-10-13 / 0.12.0
+
+- feat: Allow custom values in build context.
+
 ### 2023-10-13 / 0.11.1
 
 - fix: Do not use Sets.
