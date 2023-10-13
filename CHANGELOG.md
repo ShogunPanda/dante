@@ -1,3 +1,7 @@
+### 2023-10-13 / 0.11.0
+
+- feat: Added static directory option to server.
+
 ### 2023-10-12 / 0.10.0
 
 - fix: Updated template.
