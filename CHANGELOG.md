@@ -1,3 +1,7 @@
+### 2023-10-23 / 0.13.0
+
+- chore: Updated dependencies and toolchain.
+
 ### 2023-10-13 / 0.12.0
 
 - feat: Allow custom values in build context.
