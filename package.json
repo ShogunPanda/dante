@@ -31,11 +31,12 @@
   "scripts": {
     "predev": "rm -rf dist && mkdir dist && cp -a src/assets src/templates dist",
     "dev": "swc -s -w -d dist src",
-    "prebuild": "rm -rf dist && mkdir dist && cp -a src/assets src/templates dist && npm run lint",
+    "prebuild": "rm -rf dist && mkdir dist && cp -a src/assets src/templates dist",
     "build": "swc -d dist src",
-    "postbuild": "tsc -p . --emitDeclarationOnly",
+    "postbuild": "concurrently npm:lint npm:typecheck",
     "format": "prettier -w src",
-    "lint": "eslint --ext .ts,.tsx src",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src",
+    "typecheck": "tsc -p . --emitDeclarationOnly",
     "ci": "npm run lint",
     "prepublishOnly": "npm run ci",
     "postpublish": "git push origin && git push origin -f --tags"
@@ -43,15 +44,15 @@
   "dependencies": {
     "@fastify/static": "^6.11.2",
     "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.92",
-    "@unocss/core": "^0.56.5",
-    "@unocss/transformer-directives": "^0.56.5",
+    "@swc/core": "^1.3.94",
+    "@unocss/core": "^0.57.0",
+    "@unocss/transformer-directives": "^0.57.0",
     "chokidar": "^3.5.3",
-    "commander": "^11.0.0",
-    "fastify": "^4.23.2",
+    "commander": "^11.1.0",
+    "fastify": "^4.24.3",
     "fastify-http-errors-enhanced": "^4.2.0",
     "glob": "^10.3.10",
-    "magic-string": "^0.30.4",
+    "magic-string": "^0.30.5",
     "pino-pretty": "^10.2.3",
     "postcss": "^8.4.31",
     "postcss-discard-comments": "^6.0.0",
@@ -64,15 +65,19 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@cowtech/eslint-config": "^8.9.1",
+    "@cowtech/eslint-config": "^8.10.0",
     "@types/glob": "^8.1.0",
-    "@types/node": "^20.8.3",
-    "@types/postcss-import": "^14.0.1",
-    "eslint": "^8.51.0",
+    "@types/node": "^20.8.7",
+    "@types/postcss-import": "^14.0.2",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.52.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">= 18.18.0"
+  },
+  "tap": {
+    "extends": "./test/config/tap.yml"
   }
 }

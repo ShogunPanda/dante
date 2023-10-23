@@ -22,7 +22,7 @@
     "build": "dante build",
     "serve": "dante server",
     "format": "prettier -w src",
-    "lint": "eslint --ext .ts,.tsx src"
+    "lint": "eslint --cache --ext .ts,.tsx src"
   },
   "dependencies": {
     "react": "^18.2.0",
