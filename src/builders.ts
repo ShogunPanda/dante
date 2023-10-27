@@ -22,7 +22,7 @@ export async function compileSourceCode(): Promise<void> {
   })
 
   const swc = await resolveSwc()
-  const compilation = spawn(swc, ['-d', 'tmp', 'src'])
+  const compilation = spawn(swc, ['-d', '.dante', 'src'])
   let error = Buffer.alloc(0)
 
   compilation.stderr.on('data', chunk => {
@@ -86,7 +86,7 @@ export async function developmentBuilder(logger: pino.Logger): Promise<void> {
     compiling = true
     let failed = false
 
-    const compilation = spawn(swc, ['-d', 'tmp', 'src'])
+    const compilation = spawn(swc, ['-d', '.dante', 'src'])
     let error = Buffer.alloc(0)
 
     compilation.stderr.on('data', chunk => {
@@ -156,7 +156,7 @@ export async function developmentBuilder(logger: pino.Logger): Promise<void> {
 }
 
 export async function productionBuilder(output: string = 'dist'): Promise<void> {
-  if (!existsSync(resolve(rootDir, './tmp')) || isMainThread) {
+  if (!existsSync(resolve(rootDir, './dante')) || isMainThread) {
     await compileSourceCode()
   }
 
@@ -170,7 +170,7 @@ export async function productionBuilder(output: string = 'dist'): Promise<void> 
   await mkdir(fullOutput, { recursive: true })
 
   if (!isMainThread) {
-    await writeFile(resolve(rootDir, 'tmp', '__status.html'), await generateHotReloadPage(), 'utf8')
+    await writeFile(resolve(rootDir, '.dante', '__status.html'), await generateHotReloadPage(), 'utf8')
   }
 
   const { build, createStylesheet, safelist } = await import(resolve(rootDir, 'tmp/build/index.js'))

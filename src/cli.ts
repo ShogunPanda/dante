@@ -15,7 +15,7 @@ let siteSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null =
 
 if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
   await compileSourceCode()
-  const imported = await import(resolve(rootDir, './tmp/build/cli.js'))
+  const imported = await import(resolve(rootDir, './.dante/build/cli.js'))
   siteSetupCLI = imported.setupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/cli.js'))) {
   const imported = await import(resolve(rootDir, './src/build/cli.js'))

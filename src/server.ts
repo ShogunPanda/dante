@@ -120,7 +120,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   if (development) {
     server.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       if (buildStatus.status !== 'success' && request.url !== '/__status') {
-        return reply.sendFile('__status.html', resolve(rootDir, 'tmp'))
+        return reply.sendFile('__status.html', resolve(rootDir, '.dante'))
       }
     })
 
