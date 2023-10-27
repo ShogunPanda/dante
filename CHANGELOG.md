@@ -1,3 +1,7 @@
+### 2023-10-27 / 0.15.0
+
+- fix: Fixed path.
+
 ### 2023-10-27 / 0.14.0
 
 - feat: Use .dante as temporary directory.
