@@ -173,7 +173,7 @@ export async function productionBuilder(output: string = 'dist'): Promise<void> 
     await writeFile(resolve(rootDir, '.dante', '__status.html'), await generateHotReloadPage(), 'utf8')
   }
 
-  const { build, createStylesheet, safelist } = await import(resolve(rootDir, 'tmp/build/index.js'))
+  const { build, createStylesheet, safelist } = await import(resolve(rootDir, '.dante/build/index.js'))
 
   await build(isMainThread ? 'production' : 'development', async (context: BuildContext) => {
     const stylesheet: string = await createStylesheet(context, true)
