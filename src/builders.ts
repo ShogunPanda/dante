@@ -75,13 +75,13 @@ export async function developmentBuilder(logger: pino.Logger): Promise<void> {
   }
 
   function run(): void {
-    notifyBuildStatus('pending')
-
     timeout = null
 
     if (compiling) {
       return
     }
+
+    notifyBuildStatus('pending')
 
     compiling = true
     let failed = false

@@ -5,7 +5,7 @@ events.addEventListener('sync', ev => {
   const update = JSON.parse(ev.data)
 
   // When the status has changedf
-  if (lastStatus && update.status !== lastStatus) {
+  if (lastStatus && update.status !== lastStatus && ['success', 'failed'].includes(update.status)) {
     // Wait for some time before reloading. For most talks this will end up reloading when compilation has ended.
     setTimeout(() => {
       location.reload()
