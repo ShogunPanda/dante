@@ -1,3 +1,9 @@
+### 2023-10-27 / 0.14.0
+
+- feat: Use .dante as temporary directory.
+- feat: Minor improvements.
+- chore: Changed TypeScript version.
+
 ### 2023-10-23 / 0.13.0
 
 - chore: Updated dependencies and toolchain.
