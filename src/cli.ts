@@ -6,7 +6,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
 import { compileSourceCode } from './builders.js'
-import { rootDir } from './models.js'
+import { baseTemporaryDirectory, programName, rootDir } from './models.js'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
@@ -15,7 +15,7 @@ let siteSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null =
 
 if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
   await compileSourceCode()
-  const imported = await import(resolve(rootDir, './.dante/build/cli.js'))
+  const imported = await import(resolve(rootDir, baseTemporaryDirectory, 'build/cli.js'))
   siteSetupCLI = imported.setupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/cli.js'))) {
   const imported = await import(resolve(rootDir, './src/build/cli.js'))
@@ -23,7 +23,7 @@ if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
 }
 
 program
-  .name('dante')
+  .name(programName)
   .version(packageInfo.version, '-V, --version', 'Show version number')
   .helpOption('-h, --help', 'Show this help')
   .addHelpCommand(false)

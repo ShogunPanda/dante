@@ -4,6 +4,9 @@ import { resolve } from 'node:path'
 export type Mode = 'development' | 'production'
 
 export const rootDir = process.cwd()
+export let programName = 'dante'
+export let baseTemporaryDirectory = '.dante'
+
 let swc: string
 
 export async function resolveSwc(): Promise<string> {
@@ -18,4 +21,12 @@ export async function resolveSwc(): Promise<string> {
 
   swc = location[0]
   return swc
+}
+
+export function setProgramName(name: string): void {
+  programName = name
+}
+
+export function setBaseTemporaryDirectory(dir: string): void {
+  baseTemporaryDirectory = dir
 }

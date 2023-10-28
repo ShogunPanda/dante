@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
-import { rootDir } from './models.js'
+import { baseTemporaryDirectory, rootDir } from './models.js'
 
 interface BuildStatus {
   status: 'pending' | 'success' | 'failed'
@@ -120,7 +120,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   if (development) {
     server.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       if (buildStatus.status !== 'success' && request.url !== '/__status') {
-        return reply.sendFile('__status.html', resolve(rootDir, '.dante'))
+        return reply.sendFile('__status.html', resolve(rootDir, baseTemporaryDirectory))
       }
     })
 
