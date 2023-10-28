@@ -1,3 +1,7 @@
+### 2023-10-28 / 0.16.0
+
+- feat: Make executable configurable.
+
 ### 2023-10-27 / 0.15.1
 
 
