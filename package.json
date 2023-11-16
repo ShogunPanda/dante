@@ -15,7 +15,7 @@
   "private": false,
   "bin": {
     "dante": "bin/dante",
-    "create-dante-site": "dist/create-dante-site"
+    "create-dante-site": "bin/create-dante-site"
   },
   "files": [
     "bin",
