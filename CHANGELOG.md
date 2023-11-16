@@ -1,3 +1,7 @@
+### 2023-11-16 / 0.19.0
+
+- feat: Show server message.
+
 ### 2023-11-16 / 0.18.0
 
 - fix: Fixed watch mode for non dev mode.
