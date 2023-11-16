@@ -150,13 +150,22 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   })
 
   return new Promise<FastifyInstance>((resolve, reject) => {
-    server.listen({ host: ip, port }, (err: Error | null) => {
-      if (err) {
-        reject(err)
-        return
-      }
+    server.listen(
+      {
+        host: ip,
+        port,
+        listenTextResolver(address: string): string {
+          return `Server listening at ${address}.`
+        }
+      },
+      (err: Error | null) => {
+        if (err) {
+          reject(err)
+          return
+        }
 
-      resolve(server as unknown as FastifyInstance)
-    })
+        resolve(server as unknown as FastifyInstance)
+      }
+    )
   })
 }

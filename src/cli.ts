@@ -1,5 +1,6 @@
 import { program, type Command } from 'commander'
 import { existsSync, readFileSync } from 'node:fs'
+import { type AddressInfo } from 'node:net'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
@@ -36,7 +37,7 @@ program
   .command('development')
   .description('Starts the development builder')
   .option('-d, --directory <dir>', 'The directory where to build and serve files from', 'dist')
-  .option('-i, --ip <ip>', 'The IP to listen on', '::')
+  .option('-i, --ip <ip>', 'The IP to listen on', '0.0.0.0')
   .option('-p, --port <port>', 'The port to listen on', (v: string) => Number.parseInt(v, 10), 4200)
   .alias('dev')
   .alias('d')
@@ -47,7 +48,11 @@ program
       const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
       await compileSourceCode(logger)
-      await localServer({ ip, port, logger: false, development: true, staticDir: absoluteStaticDir })
+      const server = await localServer({ ip, port, logger: false, development: true, staticDir: absoluteStaticDir })
+      const protocol = existsSync(resolve(rootDir, 'ssl')) ? 'https' : 'http'
+      const address = server.server.address()! as AddressInfo
+
+      logger.info(`Server listening at ${protocol}://${address.address}:${address.port}.`)
       await builder(buildContext)
     } catch (error) {
       logger.error(error)
