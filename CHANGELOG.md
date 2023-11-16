@@ -1,3 +1,7 @@
+### 2023-11-16 / 0.17.2
+
+- fix: Fixed wrong executable path.
+
 ### 2023-11-16 / 0.17.1
 
 - fix: Fixed wrong executable path.
