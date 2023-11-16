@@ -89,7 +89,7 @@ program
       await localServer({
         ip,
         port,
-        logger: pino({ level: process.env.LOG_LEVEL ?? 'info' }),
+        logger,
         development: false,
         staticDir: resolve(rootDir, staticDir)
       })
