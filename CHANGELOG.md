@@ -1,3 +1,8 @@
+### 2023-11-16 / 0.16.1
+
+- feat: Rewritten using node watcher.
+- chore: Fixed CI script.
+
 ### 2023-10-28 / 0.16.0
 
 - feat: Make executable configurable.
