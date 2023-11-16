@@ -1,3 +1,7 @@
+### 2023-11-16 / 0.18.0
+
+- fix: Fixed watch mode for non dev mode.
+
 ### 2023-11-16 / 0.17.2
 
 - fix: Fixed wrong executable path.
