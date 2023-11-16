@@ -3,7 +3,7 @@ import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest }
 import { BAD_REQUEST, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
 import EventEmitter from 'node:events'
 import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
@@ -106,16 +106,18 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
       }
     : null
 
+  const { serverDir } = await import(resolve(rootDir, baseTemporaryDirectory, 'build/index.js'))
+
+  const root = resolve(...[staticDir, serverDir].filter(s => s))
+  await mkdir(root, { recursive: true })
+
   const server = fastify({
     https,
     logger: logger ?? { transport: { target: 'pino-pretty' } },
     forceCloseConnections: true
   })
 
-  await server.register(fastifyStatic, {
-    root: resolve(rootDir, staticDir),
-    decorateReply: true
-  })
+  await server.register(fastifyStatic, { root, decorateReply: true, index: ['index.html', 'index.htm'] })
 
   if (development) {
     server.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {

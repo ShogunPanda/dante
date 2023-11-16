@@ -15,6 +15,7 @@ import { type Processor, type Transformer } from 'unified'
 import { type Node } from 'unist'
 import { visit } from 'unist-util-visit'
 import { type VFile } from 'vfile'
+import { type BuildContext } from './models.js'
 
 interface CompressCSSClassesPluginOptions {
   safelist?: string[]
@@ -27,15 +28,6 @@ interface CSSClassGeneratorContext {
 
 type Rehype = Processor<Root, undefined, undefined, Root, string>
 type CSSImporter = (id: string) => Promise<string | null>
-
-export interface BuildContext {
-  isProduction: boolean
-  cssClasses: Set<string>
-  safelist: string[]
-  keepExpandedCss: boolean
-  removeUnusedCss: boolean
-  extensions?: any
-}
 
 type InternalClassesExpansions = Record<string, Set<string>>
 export type ClassesExpansions = Record<string, string[]>
@@ -265,10 +257,6 @@ export function expandClasses(classes: ClassesExpansions, klasses: string): stri
       return classes[klass]
     })
     .join(' ')
-}
-
-export function createBuildContext(isProduction: boolean, safelist: string[]): BuildContext {
-  return { isProduction, cssClasses: new Set(), safelist, keepExpandedCss: false, removeUnusedCss: true }
 }
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {

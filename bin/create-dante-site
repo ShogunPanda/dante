@@ -1,1 +1,3 @@
-../dist/create.js
+#!/bin/bash
+
+node ../dist/create.js

@@ -1,24 +1,42 @@
-const events = new EventSource('/__status')
-let lastStatus = null
+function startSyncing() {
+  let lastStatus = null
+  let open = false
 
-events.addEventListener('sync', ev => {
-  const update = JSON.parse(ev.data)
+  const events = new EventSource('/__status')
 
-  // When the status has changedf
-  if (lastStatus && update.status !== lastStatus && ['success', 'failed'].includes(update.status)) {
-    // Wait for some time before reloading. For most talks this will end up reloading when compilation has ended.
-    setTimeout(() => {
-      location.reload()
-    }, 500)
-  }
+  events.addEventListener('open', e => {
+    console.log('OPEN')
+    open = true
+  })
 
-  lastStatus = update.status
-})
+  events.addEventListener('sync', ev => {
+    const update = JSON.parse(ev.data)
 
-events.addEventListener('end', e => {
-  events.close()
-})
+    // When the status has changedf
+    if (lastStatus && update.status !== lastStatus && ['success', 'failed'].includes(update.status)) {
+      // Wait for some time before reloading. For most talks this will end up reloading when compilation has ended.
+      setTimeout(() => {
+        location.reload()
+      }, 500)
+    }
 
-events.addEventListener('error', event => {
-  console.error('Receiving synchronization failed', event)
-})
+    lastStatus = update.status
+  })
+
+  events.addEventListener('end', e => {
+    events.close()
+  })
+
+  events.addEventListener('error', event => {
+    if (open) {
+      open = false
+      console.debug('Synchronization connection lost, reconnecting ...', event)
+
+      setTimeout(() => location.reload(), 500)
+    } else {
+      console.error('Synchronization connection failed.', event)
+    }
+  })
+}
+
+startSyncing()

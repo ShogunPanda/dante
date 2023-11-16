@@ -14,10 +14,11 @@
   "license": "ISC",
   "private": false,
   "bin": {
-    "dante": "dist/cli.js",
-    "create-dante-site": "dist/create.js"
+    "dante": "bin/dante",
+    "create-dante-site": "dist/create-dante-site"
   },
   "files": [
+    "bin",
     "dist",
     "CHANGELOG.md",
     "LICENSE.md",

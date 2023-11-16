@@ -1,12 +1,11 @@
-#!/usr/bin/env node
-
 import { program, type Command } from 'commander'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
-import { compileSourceCode } from './builders.js'
-import { baseTemporaryDirectory, programName, rootDir } from './models.js'
+import { builder, compileSourceCode } from './build.js'
+import { baseTemporaryDirectory, createBuildContext, programName, rootDir } from './models.js'
+import { localServer } from './server.js'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
@@ -36,20 +35,20 @@ program
 program
   .command('development')
   .description('Starts the development builder')
-  .option('-d, --directory <dir>', 'The directory to server files from', 'dist')
+  .option('-d, --directory <dir>', 'The directory where to build and serve files from', 'dist')
   .option('-i, --ip <ip>', 'The IP to listen on', '::')
   .option('-p, --port <port>', 'The port to listen on', (v: string) => Number.parseInt(v, 10), 4200)
   .alias('dev')
   .alias('d')
   .action(async function devAction(this: Command): Promise<void> {
     try {
-      const { localServer } = await import('./server.js')
-      const { developmentBuilder } = await import('./builders.js')
-
       const { ip, port, directory: staticDir } = this.optsWithGlobals()
+      const absoluteStaticDir = resolve(rootDir, staticDir)
+      const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
-      await localServer({ ip, port, logger, development: true, staticDir })
-      await developmentBuilder(logger)
+      await compileSourceCode(logger)
+      await localServer({ ip, port, logger: false, development: true, staticDir: absoluteStaticDir })
+      await builder(buildContext)
     } catch (error) {
       logger.error(error)
       process.exit(1)
@@ -59,12 +58,16 @@ program
 program
   .command('build')
   .description('Builds the site')
+  .option('-d, --directory <dir>', 'The directory where to build files to', 'dist')
   .alias('b')
   .action(async function buildAction(this: Command): Promise<void> {
     try {
-      const { productionBuilder } = await import('./builders.js')
+      const { directory: staticDir } = this.optsWithGlobals()
+      const absoluteStaticDir = resolve(rootDir, staticDir)
+      const buildContext = createBuildContext(logger, true, absoluteStaticDir)
 
-      await productionBuilder()
+      await compileSourceCode(logger)
+      await builder(buildContext)
     } catch (error) {
       logger.error(error)
       process.exit(1)
@@ -81,15 +84,14 @@ program
   .alias('s')
   .action(async function serveAction(this: Command): Promise<void> {
     try {
-      const { localServer } = await import('./server.js')
-
       const { ip, port, directory: staticDir } = this.optsWithGlobals()
+
       await localServer({
         ip,
         port,
         logger: pino({ level: process.env.LOG_LEVEL ?? 'info' }),
         development: false,
-        staticDir
+        staticDir: resolve(rootDir, staticDir)
       })
     } catch (error) {
       logger.error(error)

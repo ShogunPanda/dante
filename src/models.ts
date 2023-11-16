@@ -1,8 +1,22 @@
 import { glob } from 'glob'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type pino from 'pino'
 
 export type Mode = 'development' | 'production'
 
+export interface BuildContext {
+  logger: pino.Logger
+  isProduction: boolean
+  root: string
+  cssClasses: Set<string>
+  safelist: string[]
+  keepExpandedCss: boolean
+  removeUnusedCss: boolean
+  extensions?: any
+}
+
+export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()
 export let programName = 'dante'
 export let baseTemporaryDirectory = '.dante'
@@ -29,4 +43,13 @@ export function setProgramName(name: string): void {
 
 export function setBaseTemporaryDirectory(dir: string): void {
   baseTemporaryDirectory = dir
+}
+
+export function createBuildContext(
+  logger: pino.Logger,
+  isProduction: boolean,
+  root: string,
+  safelist: string[] = []
+): BuildContext {
+  return { logger, isProduction, root, cssClasses: new Set(), safelist, keepExpandedCss: false, removeUnusedCss: true }
 }

@@ -1,1 +1,20 @@
-../dist/cli.js
+#!/bin/bash
+
+ROOT=$(dirname $(realpath $0))
+
+DANTE_WATCH_ADDITIONAL_OPTIONS=""
+
+if test "${DANTE_WATCH_MODULES}" = "true"; then
+  DANTE_WATCH_ADDITIONAL_OPTIONS="--watch-path node_modules/dante"
+fi
+
+if test "${DANTE_WATCH_ADDITIONAL_PATHS}" != ""; then
+  OIFS=$IFS
+  IFS=','
+  for i in ${DANTE_WATCH_ADDITIONAL_PATHS}; do
+    DANTE_WATCH_ADDITIONAL_OPTIONS="$DANTE_WATCH_ADDITIONAL_OPTIONS --watch-path \"$i\""
+  done;
+  IFS=$OIFS
+fi;
+
+node --no-warnings --watch-path src $DANTE_WATCH_ADDITIONAL_OPTIONS $ROOT/../dist/cli.js $@
