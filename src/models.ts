@@ -6,6 +6,7 @@ import type pino from 'pino'
 export type Mode = 'development' | 'production'
 
 export interface BuildContext {
+  version: string
   logger: pino.Logger
   isProduction: boolean
   root: string
@@ -16,10 +17,12 @@ export interface BuildContext {
   extensions?: any
 }
 
+// TODO@PI: Document all environment variables
 export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()
-export let programName = 'dante'
-export let baseTemporaryDirectory = '.dante'
+export const programName = process.env.DANTE_PROGRAM_NAME ?? 'dante'
+export const programDescription = process.env.DANTE_PROGRAM_DESCRIPTION ?? 'Opinionated static site generator.'
+export const baseTemporaryDirectory = process.env.DANTE_BASE_TEMPORARY_DIRECTORY ?? '.dante'
 
 let swc: string
 
@@ -37,12 +40,12 @@ export async function resolveSwc(): Promise<string> {
   return swc
 }
 
-export function setProgramName(name: string): void {
-  programName = name
-}
+export function buildFilePath(): string {
+  if (process.env.DANTE_BUILD_FILE_PATH) {
+    return resolve(rootDir, process.env.DANTE_BUILD_FILE_PATH)
+  }
 
-export function setBaseTemporaryDirectory(dir: string): void {
-  baseTemporaryDirectory = dir
+  return resolve(rootDir, baseTemporaryDirectory, 'build/index.js')
 }
 
 export function createBuildContext(
@@ -51,5 +54,17 @@ export function createBuildContext(
   root: string,
   safelist: string[] = []
 ): BuildContext {
-  return { logger, isProduction, root, cssClasses: new Set(), safelist, keepExpandedCss: false, removeUnusedCss: true }
+  return {
+    version: new Date()
+      .toISOString()
+      .replaceAll(/([:-])|(\.\d+Z$)/g, '')
+      .replace('T', '.'),
+    logger,
+    isProduction,
+    root,
+    cssClasses: new Set(),
+    safelist,
+    keepExpandedCss: false,
+    removeUnusedCss: true
+  }
 }

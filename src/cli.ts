@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
 import { builder, compileSourceCode } from './build.js'
-import { baseTemporaryDirectory, createBuildContext, programName, rootDir } from './models.js'
+import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.js'
 import { localServer } from './server.js'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
@@ -13,7 +13,10 @@ const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.js
 
 let siteSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null = null
 
-if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
+if (process.env.DANTE_CLI_PATH) {
+  const imported = await import(resolve(rootDir, process.env.DANTE_CLI_PATH))
+  siteSetupCLI = imported.setupCLI ?? null
+} else if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
   await compileSourceCode()
   const imported = await import(resolve(rootDir, baseTemporaryDirectory, 'build/cli.js'))
   siteSetupCLI = imported.setupCLI ?? null
@@ -24,6 +27,7 @@ if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
 
 program
   .name(programName)
+  .description(programDescription)
   .version(packageInfo.version, '-V, --version', 'Show version number')
   .helpOption('-h, --help', 'Show this help')
   .addHelpCommand(false)
@@ -48,7 +52,7 @@ program
       const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
       await compileSourceCode(logger)
-      const server = await localServer({ ip, port, logger: false, development: true, staticDir: absoluteStaticDir })
+      const server = await localServer({ ip, port, logger: false, isProduction: false, staticDir: absoluteStaticDir })
       const protocol = existsSync(resolve(rootDir, 'ssl')) ? 'https' : 'http'
       const address = server.server.address()! as AddressInfo
 
@@ -95,7 +99,7 @@ program
         ip,
         port,
         logger,
-        development: false,
+        isProduction: true,
         staticDir: resolve(rootDir, staticDir)
       })
     } catch (error) {

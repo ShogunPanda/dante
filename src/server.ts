@@ -7,7 +7,13 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
-import { baseTemporaryDirectory, rootDir } from './models.js'
+import { baseTemporaryDirectory, buildFilePath, rootDir } from './models.js'
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    rootDir: string
+  }
+}
 
 interface BuildStatus {
   status: 'pending' | 'success' | 'failed'
@@ -18,7 +24,7 @@ interface ServerOptions {
   ip: string
   port: number
   logger: pino.Logger | false
-  development?: boolean
+  isProduction?: boolean
   staticDir: string
 }
 
@@ -26,7 +32,7 @@ const defaultServerOptions: ServerOptions = {
   ip: '::',
   port: 0,
   logger: false,
-  development: false,
+  isProduction: true,
   staticDir: 'dist/html'
 }
 
@@ -96,7 +102,7 @@ function syncHandler(this: FastifyInstance, _: FastifyRequest, reply: FastifyRep
 }
 
 export async function localServer(options?: Partial<ServerOptions>): Promise<FastifyInstance> {
-  const { ip, port, logger, staticDir, development } = { ...defaultServerOptions, ...options }
+  const { ip, port, logger, staticDir, isProduction } = { ...defaultServerOptions, ...options }
 
   const https = existsSync(resolve(rootDir, 'ssl'))
     ? {
@@ -106,7 +112,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
       }
     : null
 
-  const { serverDir } = await import(resolve(rootDir, baseTemporaryDirectory, 'build/index.js'))
+  const { serverDir, setupServer } = await import(buildFilePath())
 
   const root = resolve(...[staticDir, serverDir].filter(s => s))
   await mkdir(root, { recursive: true })
@@ -117,9 +123,14 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
     forceCloseConnections: true
   })
 
-  await server.register(fastifyStatic, { root, decorateReply: true, index: ['index.html', 'index.htm'] })
+  if (typeof setupServer === 'function') {
+    await setupServer(server, isProduction)
+  }
 
-  if (development) {
+  await server.register(fastifyStatic, { root, decorateReply: true, index: ['index.html', 'index.htm'] })
+  server.decorate('rootDir', root)
+
+  if (!isProduction) {
     server.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       if (buildStatus.status !== 'success' && request.url !== '/__status') {
         return reply.sendFile('__status.html', resolve(rootDir, baseTemporaryDirectory))

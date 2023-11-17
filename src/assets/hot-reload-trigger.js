@@ -5,7 +5,6 @@ function startSyncing() {
   const events = new EventSource('/__status')
 
   events.addEventListener('open', e => {
-    console.log('OPEN')
     open = true
   })
 

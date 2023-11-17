@@ -6,7 +6,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
 import { finalizePage } from './css.js'
-import { baseTemporaryDirectory, danteDir, resolveSwc, rootDir, type BuildContext } from './models.js'
+import { baseTemporaryDirectory, buildFilePath, danteDir, resolveSwc, rootDir, type BuildContext } from './models.js'
 import { notifyBuildStatus } from './server.js'
 
 export function elapsed(start: bigint): string {
@@ -84,26 +84,29 @@ export async function builder(context: BuildContext): Promise<void> {
     await writeFile(resolve(rootDir, baseTemporaryDirectory, '__status.html'), await generateHotReloadPage(), 'utf8')
   }
 
-  const { build, createStylesheet, safelist } = await import(resolve(rootDir, baseTemporaryDirectory, 'build/index.js'))
+  // Perform the build
+  const { build, createStylesheet, safelist } = await import(buildFilePath())
 
-  await build(context, async (context: BuildContext) => {
-    const stylesheet: string = await createStylesheet(context, true)
+  await build(context)
 
-    // Now, for each generated page, replace the @import class with the production CSS
-    const pages = await glob(resolve(fullOutput, '**/*.html'))
-    for (const page of pages) {
-      let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, safelist)
+  // Now, for each generated page, replace the @import class with the production CSS
+  const pages = await glob(resolve(fullOutput, '**/*.html'))
 
-      if (!context.isProduction) {
-        finalized = finalized.replace(
-          '</body>',
-          `<script type="text/javascript">${hotReloadClient.code}</script></body>`
-        )
-      }
+  for (const page of pages) {
+    const stylesheet: string = await createStylesheet(context, page, true)
+    const finalSafelist = typeof safelist === 'function' ? await safelist(context, page) : safelist
 
-      await writeFile(page, finalized, 'utf8')
+    let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
+
+    if (!context.isProduction) {
+      finalized = finalized.replace(
+        '</body>',
+        `<script type="text/javascript">${hotReloadClient!.code}</script></body>`
+      )
     }
-  })
+
+    await writeFile(page, finalized, 'utf8')
+  }
 
   context.logger.info(`Building completed in ${elapsed(operationStart)} ms.`)
   notifyBuildStatus('success')

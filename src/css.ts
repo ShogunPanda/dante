@@ -93,6 +93,7 @@ function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {})
         if (safelist.has(klass)) {
           // Do not compress safelist classes
           klasses.push(klass)
+          compressedClasses.set(klass, klass)
         } else {
           // Generate a new compressed class
           if (!compressedClasses.has(klass)) {
@@ -162,7 +163,7 @@ export async function purgeCss(html: string, css: string): Promise<string> {
         raw: css
       }
     ],
-    safelist: [/[#$:[\\]./],
+    safelist: [/[#@$:[\\]./],
     variables: false
   })
 
@@ -320,7 +321,10 @@ export async function finalizePage(
 
         const newSelector: string[] = []
         for (const selector of decl.selector.split(/\s*,\s*/).map(s => s.trim())) {
-          const [klass, modifier] = selector.slice(1).split(':')
+          // Split class and only keep the last modifier
+          let [klass, ...modifiers] = selector.slice(1).split(':')
+          klass = [klass, ...modifiers.slice(0, -1)].join(':')
+          const modifier = modifiers.at(-1)
 
           if (safelist.includes(klass)) {
             newSelector.push(selector)
