@@ -163,7 +163,7 @@ export async function purgeCss(html: string, css: string): Promise<string> {
         raw: css
       }
     ],
-    safelist: [/[#@$:[\\]./],
+    safelist: [/[!#@$:[\\]./],
     variables: false
   })
 
