@@ -1,3 +1,7 @@
+### 2023-11-17 / 0.20.1
+
+- fix: Minor fix.
+
 ### 2023-11-17 / 0.20.0
 
 - feat: Improved customization.
