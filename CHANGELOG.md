@@ -1,3 +1,7 @@
+### 2023-11-17 / 0.20.0
+
+- feat: Improved customization.
+
 ### 2023-11-16 / 0.19.0
 
 - feat: Show server message.
