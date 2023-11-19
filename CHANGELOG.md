@@ -1,3 +1,7 @@
+### 2023-11-19 / 0.21.1
+
+- fix: Increased HMR reload timers.
+
 ### 2023-11-17 / 0.21.0
 
 - feat: Added missing exports.
