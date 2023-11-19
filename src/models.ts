@@ -63,7 +63,7 @@ export function createBuildContext(
     root,
     cssClasses: new Set(),
     safelist,
-    keepExpandedCss: false,
-    removeUnusedCss: true
+    keepExpandedCss: !isProduction,
+    removeUnusedCss: isProduction
   }
 }
