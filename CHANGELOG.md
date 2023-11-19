@@ -1,3 +1,7 @@
+### 2023-11-19 / 0.22.0
+
+- feat: Different defaults for CSS class management.
+
 ### 2023-11-19 / 0.21.1
 
 - fix: Increased HMR reload timers.
