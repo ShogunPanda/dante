@@ -246,9 +246,9 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
   return classes
 }
 
-export function expandClasses(classes: ClassesExpansions, klasses: string): string {
+export function expandClasses(classes: ClassesExpansions, klasses?: string): string {
   // For each input class
-  return klasses
+  return (klasses ?? '')
     .split(' ')
     .flatMap(klass => {
       if (!classes[klass]) {
