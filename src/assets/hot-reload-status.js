@@ -17,7 +17,7 @@
           errorContents.innerHTML = ''
           break
         case 'success':
-          location.reload()
+          setTimeout(() => location.reload(), 1000)
           break
         case 'failed':
           pendingMessage.classList.add('hidden')
@@ -40,7 +40,7 @@
         open = false
         console.debug('Synchronization connection lost, reconnecting ...', event)
 
-        setTimeout(() => location.reload(), 500)
+        setTimeout(() => location.reload(), 1000)
       } else {
         console.error('Synchronization connection failed.', event)
       }

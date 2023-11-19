@@ -17,7 +17,6 @@ export interface BuildContext {
   extensions?: any
 }
 
-// TODO@PI: Document all environment variables
 export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()
 export const programName = process.env.DANTE_PROGRAM_NAME ?? 'dante'

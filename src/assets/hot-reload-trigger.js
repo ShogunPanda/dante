@@ -16,7 +16,7 @@ function startSyncing() {
       // Wait for some time before reloading. For most talks this will end up reloading when compilation has ended.
       setTimeout(() => {
         location.reload()
-      }, 500)
+      }, 1000)
     }
 
     lastStatus = update.status
@@ -31,7 +31,7 @@ function startSyncing() {
       open = false
       console.debug('Synchronization connection lost, reconnecting ...', event)
 
-      setTimeout(() => location.reload(), 500)
+      setTimeout(() => location.reload(), 1000)
     } else {
       console.error('Synchronization connection failed.', event)
     }

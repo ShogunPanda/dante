@@ -32,14 +32,30 @@ Your `src/build/index.ts` must export the following members:
 - `createStylesheet`: A function that converts a list of CSS classes in CSS code. Inside use of `createStylesheet` function exported from `dante` is encouraged.
 - `safelist`: A list of CSS classes that you always to be present in any page and that will not be compressed.
 
+It can also optionally export the following members:
+
+- `serverDir`: A subdirectory in the dist folder to server HTML files from.
+- `setupServer`: A function that receives a fastify server instance and build context. You can use this to add new behavior to the server.
+
 ### Exporting
 
 Once you have done editing, you should execute `dante build`. The website will be exported in the `dist` folder.
 
-### Adding commands to dante
+### Adding commands to Dante
 
 You can create a file `src/build/cli.ts` that should export a `setupCLI` function.
-The function will received a [commander](https://npm.im/commander) program and a [pino](https://getpino.io) logger in order to modify the dante CLI.
+The function will received a [commander](https://npm.im/commander) program and a [pino](https://getpino.io) logger in order to modify the Dante CLI.
+
+### Environments variables
+
+- `DANTE_BUILD_FILE_PATH`: The build file path. Default is `src/build/index.ts`.
+- `DANTE_CLI_PATH`: The CLI customization file path. Default is `src/build/cli.ts`.
+- `DANTE_BASE_TEMPORARY_DIRECTORY`: The local directory in which transpile TypeScript files before building. Default is `.dante`.
+- `DANTE_WATCH_MODULES`: If to restart the process when the Dante files in the `node_modules` folder are changed.
+- `DANTE_WATCH_ADDITIONAL_PATHS`: Which additional paths to watch.
+- `DANTE_NODE_ADDITIONAL_OPTIONS`: Additional options to pass to the node executable.
+- `DANTE_PROGRAM_NAME`: The name to show when doing `dante --help`. This is mostly for NPM modules extending Dante.
+- `DANTE_PROGRAM_DESCRIPTION`: The name to show when doing `dante --help`. This is mostly for NPM modules extending Dante.
 
 ## ESM Only
 
