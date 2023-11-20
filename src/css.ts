@@ -198,6 +198,8 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
 
         // For each selector of this rule
         for (const selector of decl.selectors) {
+          const layer = selector.includes('@') ? decl.selector.slice(1).split('@')[0] + '@' : ''
+
           // Split modifiers
           const [klass, ...modifiers] = selector.slice(1).split(':')
 
@@ -208,13 +210,13 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
           // No modifier, just set the rule untouch
           if (!modifiers.length) {
             for (const rule of rules) {
-              localClasses[klass].add(rule)
+              localClasses[klass].add(layer + rule)
             }
           } else {
             // For each modifier, apply the rule with the modifier as prefix
             for (const modifier of modifiers) {
               for (const rule of rules) {
-                localClasses[klass].add([modifier, rule].filter(Boolean).join('-'))
+                localClasses[klass].add(layer + [modifier, rule].filter(Boolean).join('-'))
               }
             }
           }
