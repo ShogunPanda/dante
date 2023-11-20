@@ -170,7 +170,7 @@ export async function purgeCss(html: string, css: string): Promise<string> {
   return result[0].css
 }
 
-export async function loadClassesExpansion(css: string): Promise<ClassesExpansions> {
+export async function loadClassesExpansion(css: string, applyLayer: boolean = false): Promise<ClassesExpansions> {
   // Load classes from the classes file
   const unserializedClass: InternalClassesExpansions = {}
 
@@ -198,25 +198,27 @@ export async function loadClassesExpansion(css: string): Promise<ClassesExpansio
 
         // For each selector of this rule
         for (const selector of decl.selectors) {
-          const layer = selector.includes('@') ? decl.selector.slice(1).split('@')[0] + '@' : ''
+          const layer = applyLayer && selector.includes('@') ? selector.slice(1).split('@')[0] + '@' : ''
 
           // Split modifiers
-          const [klass, ...modifiers] = selector.slice(1).split(':')
+          const [selectorClean, afterOrBeforePart] = selector.slice(1).split('::')
+          const [klass, ...modifiers] = selectorClean.split(':')
+          const afterOrBefore = afterOrBeforePart ? `::${afterOrBeforePart}` : ''
 
           if (!localClasses[klass]) {
-            localClasses[klass] = new Set()
+            localClasses[klass + afterOrBefore] = new Set()
           }
 
           // No modifier, just set the rule untouch
           if (!modifiers.length) {
             for (const rule of rules) {
-              localClasses[klass].add(layer + rule)
+              localClasses[klass + afterOrBefore].add(layer + rule)
             }
           } else {
             // For each modifier, apply the rule with the modifier as prefix
             for (const modifier of modifiers) {
               for (const rule of rules) {
-                localClasses[klass].add(layer + [modifier, rule].filter(Boolean).join('-'))
+                localClasses[klass + afterOrBefore].add(layer + [modifier, rule].filter(Boolean).join('-'))
               }
             }
           }
