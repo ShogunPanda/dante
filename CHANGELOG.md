@@ -1,3 +1,7 @@
+### 2023-11-20 / 0.24.0
+
+- feat: Support for before or after in rules.
+
 ### 2023-11-20 / 0.23.0
 
 - feat: Support layers in loadClassesExpansion.
