@@ -1,3 +1,7 @@
+### 2023-11-20 / 0.23.0
+
+- feat: Support layers in loadClassesExpansion.
+
 ### 2023-11-19 / 0.22.1
 
 - fix: Make function resilient.
