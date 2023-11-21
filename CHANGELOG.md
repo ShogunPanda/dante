@@ -1,3 +1,8 @@
+### 2023-11-21 / 0.24.1
+
+- fix: Better error handling.
+- feat: Support recursive class expansions.
+
 ### 2023-11-20 / 0.24.0
 
 - feat: Support for before or after in rules.
