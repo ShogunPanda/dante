@@ -251,17 +251,26 @@ export async function loadClassesExpansion(css: string, applyLayer: boolean = fa
 }
 
 export function expandClasses(classes: ClassesExpansions, klasses?: string): string {
-  // For each input class
-  return (klasses ?? '')
-    .split(' ')
-    .flatMap(klass => {
-      if (!classes[klass]) {
-        return klass
-      }
+  let current = ''
+  let replaced = klasses ?? ''
 
-      return classes[klass]
-    })
-    .join(' ')
+  while (replaced !== current) {
+    current = replaced
+
+    // For each input class
+    replaced = current
+      .split(' ')
+      .flatMap(klass => {
+        if (!classes[klass]) {
+          return klass
+        }
+
+        return classes[klass]
+      })
+      .join(' ')
+  }
+
+  return replaced
 }
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
@@ -324,7 +333,7 @@ export async function finalizePage(
         }
 
         const newSelector: string[] = []
-        for (const selector of decl.selector.split(/\s*,\s*/).map(s => s.trim())) {
+        for (const selector of decl.selector.split(/\s*,\s*/).map((s: string) => s.trim())) {
           // Split class and only keep the last modifier
           let [klass, ...modifiers] = selector.slice(1).split(':')
           klass = [klass, ...modifiers.slice(0, -1)].join(':')
