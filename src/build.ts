@@ -13,6 +13,15 @@ export function elapsed(start: bigint): string {
   return (Number(process.hrtime.bigint() - start) / 1e6).toFixed(3)
 }
 
+function serializeError(error: Buffer | Error): string {
+  return error
+    .toString()
+    .trim()
+    .replaceAll(/(^.)/gm, '$1'.padStart(4, ' '))
+    .replaceAll(rootDir, '$ROOT')
+    .replaceAll(danteDir, '$DANTE')
+}
+
 export async function compileSourceCode(logger?: pino.Logger): Promise<void> {
   const operationStart = process.hrtime.bigint()
 
@@ -34,13 +43,7 @@ export async function compileSourceCode(logger?: pino.Logger): Promise<void> {
 
   compilation.on('close', code => {
     if (code !== 0) {
-      const errorString = error
-        .toString()
-        .trim()
-        .replaceAll(/(^.)/gm, '$1'.padStart(4, ' '))
-        .replaceAll(rootDir, '$ROOT')
-        .replaceAll(danteDir, '$DANTE')
-
+      const errorString = serializeError(error)
       const errorWithCause = new Error('Code compilation failed')
       errorWithCause.cause = errorString
 
@@ -69,45 +72,51 @@ async function generateHotReloadPage(): Promise<string> {
 export async function builder(context: BuildContext): Promise<void> {
   const operationStart = process.hrtime.bigint()
 
-  // First of all create the site
-  const fullOutput = context.root
-  await rm(fullOutput, { force: true, recursive: true })
-  await mkdir(fullOutput, { recursive: true })
+  try {
+    // First of all create the site
+    const fullOutput = context.root
+    await rm(fullOutput, { force: true, recursive: true })
+    await mkdir(fullOutput, { recursive: true })
 
-  // Prepare for HMR
-  let hotReloadClient: Output
-
-  if (!context.isProduction) {
-    hotReloadClient = await minify(
-      await readFile(fileURLToPath(new URL('assets/hot-reload-trigger.js', import.meta.url)), 'utf8')
-    )
-    await writeFile(resolve(rootDir, baseTemporaryDirectory, '__status.html'), await generateHotReloadPage(), 'utf8')
-  }
-
-  // Perform the build
-  const { build, createStylesheet, safelist } = await import(buildFilePath())
-
-  await build(context)
-
-  // Now, for each generated page, replace the @import class with the production CSS
-  const pages = await glob(resolve(fullOutput, '**/*.html'))
-
-  for (const page of pages) {
-    const stylesheet: string = await createStylesheet(context, page, true)
-    const finalSafelist = typeof safelist === 'function' ? await safelist(context, page) : safelist
-
-    let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
+    // Prepare for HMR
+    let hotReloadClient: Output
 
     if (!context.isProduction) {
-      finalized = finalized.replace(
-        '</body>',
-        `<script type="text/javascript">${hotReloadClient!.code}</script></body>`
+      hotReloadClient = await minify(
+        await readFile(fileURLToPath(new URL('assets/hot-reload-trigger.js', import.meta.url)), 'utf8')
       )
+      await writeFile(resolve(rootDir, baseTemporaryDirectory, '__status.html'), await generateHotReloadPage(), 'utf8')
     }
 
-    await writeFile(page, finalized, 'utf8')
-  }
+    // Perform the build
+    const { build, createStylesheet, safelist } = await import(buildFilePath())
 
-  context.logger.info(`Building completed in ${elapsed(operationStart)} ms.`)
-  notifyBuildStatus('success')
+    await build(context)
+
+    // Now, for each generated page, replace the @import class with the production CSS
+    const pages = await glob(resolve(fullOutput, '**/*.html'))
+
+    for (const page of pages) {
+      const stylesheet: string = await createStylesheet(context, page, true)
+      const finalSafelist = typeof safelist === 'function' ? await safelist(context, page) : safelist
+
+      let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
+
+      if (!context.isProduction) {
+        finalized = finalized.replace(
+          '</body>',
+          `<script type="text/javascript">${hotReloadClient!.code}</script></body>`
+        )
+      }
+
+      await writeFile(page, finalized, 'utf8')
+    }
+
+    context.logger.info(`Building completed in ${elapsed(operationStart)} ms.`)
+    notifyBuildStatus('success')
+  } catch (error) {
+    const errorString = serializeError(error)
+    context.logger.error(`Building failed after ${elapsed(operationStart)} ms:\n\n  ${errorString}\n`)
+    notifyBuildStatus('failed', { message: 'Building failed', error: errorString })
+  }
 }
