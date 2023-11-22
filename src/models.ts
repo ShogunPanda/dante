@@ -5,7 +5,7 @@ import type pino from 'pino'
 
 export type Mode = 'development' | 'production'
 
-type ValueOrCallback<T> = T | ((context: BuildContext) => T | Promise<T>)
+export type ValueOrCallback<T> = T | ((context: BuildContext) => T | Promise<T>)
 
 export interface CSSClassGeneratorContext {
   prefix?: string
