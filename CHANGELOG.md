@@ -1,3 +1,7 @@
+### 2023-11-22 / 0.26.0
+
+- feat: Added Rust based html-utils.
+
 ### 2023-11-22 / 0.25.2
 
 - fix: Export missing type.
