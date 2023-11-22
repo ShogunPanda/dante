@@ -46,10 +46,16 @@ Once you have done editing, you should execute `dante build`. The website will b
 You can create a file `src/build/cli.ts` that should export a `setupCLI` function.
 The function will received a [commander](https://npm.im/commander) program and a [pino](https://getpino.io) logger in order to modify the Dante CLI.
 
+### Customize `create-dante-site`
+
+You can create a file `src/build/create.ts` that should export a `createSetupCLI` function.
+The function will received a [commander](https://npm.im/commander) program and a [pino](https://getpino.io) logger in order to modify the Dante CLI.
+
 ### Environments variables
 
 - `DANTE_BUILD_FILE_PATH`: The build file path. Default is `src/build/index.ts`.
 - `DANTE_CLI_PATH`: The CLI customization file path. Default is `src/build/cli.ts`.
+- `DANTE_CREATE_PATH`: The CLI customization file path. Default is `src/build/create.ts`.
 - `DANTE_BASE_TEMPORARY_DIRECTORY`: The local directory in which transpile TypeScript files before building. Default is `.dante`.
 - `DANTE_WATCH_MODULES`: If to restart the process when the Dante files in the `node_modules` folder are changed.
 - `DANTE_WATCH_ADDITIONAL_PATHS`: Which additional paths to watch.
