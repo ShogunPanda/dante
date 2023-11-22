@@ -7,7 +7,7 @@ import { page } from '../templates/index.html.js'
 
 export const safelist = []
 
-export function createStylesheet(context: BuildContext, minify: boolean): Promise<string> {
+export function createStylesheet(context: BuildContext, _page: string, minify: boolean): Promise<string> {
   return createCSS(
     cssConfig,
     context.cssClasses,
@@ -19,25 +19,13 @@ export function createStylesheet(context: BuildContext, minify: boolean): Promis
   )
 }
 
-export async function build(
-  mode: Mode,
-  after?: (context: BuildContext) => void | Promise<void>
-): Promise<BuildContext> {
-  const isProduction = mode === 'production'
-  const logger = pino({ transport: { target: 'pino-pretty' } })
-  const start = process.hrtime.bigint()
-
-  const version = new Date()
-    .toISOString()
-    .replaceAll(/([:-])|(\.\d+Z$)/g, '')
-    .replace('T', '.')
+export async function build(context: BuildContext): Promise<void> {
+  context.logger.info(`Building site (version ${context.version}) ...`)
 
   // Clean up the directory
   const baseDir = resolve(rootDir, 'dist')
   await rm(baseDir, { force: true, recursive: true })
   await mkdir(baseDir, { recursive: true })
-
-  logger.info(`Building site (version ${version}) ...`)
 
   const context: BuildContext = createBuildContext(isProduction, safelist)
   await createFile(baseDir, 'index.html', () => page(context), 'utf8')
@@ -45,10 +33,4 @@ export async function build(
   if (!isProduction) {
     await createFile(baseDir, 'style.css', () => createStylesheet(context, false), 'utf8')
   }
-
-  if (typeof after === 'function') {
-    await after(context)
-  }
-
-  logger.info(`Built successfully in ${(Number(process.hrtime.bigint() - start) / 1e6).toFixed(3)} ms!`)
 }

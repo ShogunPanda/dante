@@ -312,6 +312,7 @@ export function expandClasses(classes: ClassesExpansions, klasses?: string): str
   return replaced
 }
 
+// TODO@PI: Replace with scraper
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
   const cssClasses =
     typeof context.css.classes === 'function' ? await context.css.classes(context) : context.css.classes
@@ -347,6 +348,7 @@ export async function finalizePageCSS(
 ): Promise<string> {
   const css = context.css.removeUnused ? await purgeCss(contents, stylesheet) : stylesheet
 
+  // TODO@PI: Replace with scraper
   // First of all, replace all classes with their compressed version
   let pipeline = rehype()
 

@@ -1,12 +1,29 @@
 #!/usr/bin/env node
 
-import { program } from 'commander'
-import { readFileSync } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { program, type Command } from 'commander'
+import { existsSync, readFileSync } from 'node:fs'
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
-import { rootDir } from './models.js'
+import { compileSourceCode } from './build.js'
+import { baseTemporaryDirectory, rootDir } from './models.js'
+
+const logger = pino({ transport: { target: 'pino-pretty' } })
+
+let createSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null = null
+
+if (process.env.DANTE_CREATE_PATH) {
+  const imported = await import(resolve(rootDir, process.env.DANTE_CREATE_PATH))
+  createSetupCLI = imported.createSetupCLI ?? null
+} else if (existsSync(resolve(rootDir, './src/build/create.ts'))) {
+  await compileSourceCode()
+  const imported = await import(resolve(rootDir, baseTemporaryDirectory, 'build/create.js'))
+  createSetupCLI = imported.createSetupCLI ?? null
+} else if (existsSync(resolve(rootDir, './src/build/create.js'))) {
+  const imported = await import(resolve(rootDir, './src/build/create.js'))
+  createSetupCLI = imported.createSetupCLI ?? null
+}
 
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
 
@@ -28,9 +45,8 @@ function compile(template: string, variables: Record<string, string>): string {
   })
 }
 
-export async function initializeSite(name: string, directory: string): Promise<void> {
+export async function initializeSite(logger: pino.Logger, name: string, directory: string): Promise<void> {
   const packageJson = JSON.parse(await readFile(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
-  const logger = pino({ transport: { target: 'pino-pretty' } })
   const fullOutput = resolve(rootDir, directory)
 
   // Check if the output directory is not empty
@@ -77,8 +93,8 @@ export async function initializeSite(name: string, directory: string): Promise<v
 }
 
 program
-  .name('create'.trim())
-  .arguments('<name> [directory>')
+  .name('create-dante-site')
+  .arguments('<name>   [directory]')
   .description('Initializes a dante site.')
   .version(packageInfo.version, '-V, --version', 'Show version number')
   .helpOption('-h, --help', 'Show this help')
@@ -87,10 +103,14 @@ program
   .allowUnknownOption(false)
   .action(async (name: string, directory: string) => {
     try {
-      await initializeSite(name, directory ?? name)
+      await initializeSite(logger, name, directory ?? name)
     } catch (error) {
       console.error(error)
     }
   })
+
+if (createSetupCLI) {
+  createSetupCLI(program, logger)
+}
 
 program.parse()

@@ -1,5 +1,5 @@
 #!/bin/bash
 
 ROOT=$(dirname $(realpath $0))
-DANTE_NODE_ARGS=$(node $ROOT/args-parser.js $@)
+DANTE_NODE_ARGS=$(node $ROOT/dante-args-parser.js $@)
 node $DANTE_NODE_ARGS $(realpath $ROOT/../dist/cli.js) $@

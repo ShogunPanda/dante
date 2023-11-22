@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ROOT=$(dirname $(realpath $0))
-node $(realpath $ROOT/../dist/create.js)
+node $(realpath $ROOT/../dist/create.js) $@

@@ -20,9 +20,11 @@
   "scripts": {
     "dev": "dante development",
     "build": "dante build",
+    "postbuild": "concurrently npm:lint npm:typecheck",
     "serve": "dante server",
     "format": "prettier -w src",
-    "lint": "eslint --cache --ext .ts,.tsx src"
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src",
+    "typecheck": "tsc -p . --emitDeclarationOnly"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -39,6 +41,7 @@
     "@unocss/preset-wind": "^0.47.5",
     "@unocss/transformer-directives": "^0.47.5",
     "commander": "^9.4.1",
+    "concurrently": "^8.2.2",
     "dante": "^@VERSION@",
     "pino": "^8.8.0",
     "prettier": "^2.5.1"
