@@ -14,6 +14,8 @@ import stringify from 'rehype-stringify'
 import { type Processor, type Transformer } from 'unified'
 import { type Node } from 'unist'
 import { visit } from 'unist-util-visit'
+// @ts-expect-error This will be present at runtime
+import { extractCSSClasses } from './lib/html-utils/html_utils.js'
 import { type BuildContext, type CSSClassGeneratorContext } from './models.js'
 
 interface CompressCSSClassesPluginOptions {
@@ -53,16 +55,6 @@ function cssClass(context: CSSClassGeneratorContext): void {
 
     // Avoid some combinations
   } while (cssForbiddenClasses.has(context.name))
-}
-
-function extractCSSClassesPlugin(classes: Set<string>, _: object): Transformer {
-  return (tree: Node) => {
-    visit(tree, 'element', (node: Element) => {
-      for (const klass of (node.properties?.className as string[]) ?? []) {
-        classes.add(klass)
-      }
-    })
-  }
 }
 
 export function compressCSSClasses(
@@ -312,13 +304,11 @@ export function expandClasses(classes: ClassesExpansions, klasses?: string): str
   return replaced
 }
 
-// TODO@PI: Replace with scraper
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
   const cssClasses =
     typeof context.css.classes === 'function' ? await context.css.classes(context) : context.css.classes
 
-  // First of all, extract classes and put them into the big list, which will only be processed once
-  await rehype().use(extractCSSClassesPlugin.bind(null, cssClasses), {}).process(contents)
+  extractCSSClasses(cssClasses, contents)
 
   return '@import "/style.css";'
 }
@@ -348,7 +338,7 @@ export async function finalizePageCSS(
 ): Promise<string> {
   const css = context.css.removeUnused ? await purgeCss(contents, stylesheet) : stylesheet
 
-  // TODO@PI: Replace with scraper
+  // TODO@PI: Move into Rust using https://github.com/cloudflare/lol-html
   // First of all, replace all classes with their compressed version
   let pipeline = rehype()
 
