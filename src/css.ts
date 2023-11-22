@@ -98,7 +98,9 @@ function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {})
           // Generate a new compressed class
           if (!compressedClasses.has(klass)) {
             cssClass(classGenerationContext)
-            compressedClasses.set(klass, classGenerationContext.name)
+            const layerIndex = klass.indexOf('@')
+            const layer = layerIndex !== -1 ? klass.substring(0, layerIndex) + '@' : ''
+            compressedClasses.set(klass, layer + classGenerationContext.name)
           }
 
           // Replace the class
@@ -244,7 +246,11 @@ export async function loadClassesExpansion(css: string, applyLayer: boolean = fa
   const classes: ClassesExpansions = {}
 
   for (const [compressed, expanded] of Object.entries(unserializedClass)) {
-    classes[compressed] = [...expanded]
+    const allExpansions = [...expanded]
+
+    if (allExpansions.length) {
+      classes[compressed] = allExpansions
+    }
   }
 
   return classes
@@ -260,13 +266,7 @@ export function expandClasses(classes: ClassesExpansions, klasses?: string): str
     // For each input class
     replaced = current
       .split(' ')
-      .flatMap(klass => {
-        if (!classes[klass]) {
-          return klass
-        }
-
-        return classes[klass]
-      })
+      .flatMap(klass => classes[klass] ?? klass)
       .join(' ')
   }
 
@@ -336,6 +336,7 @@ export async function finalizePage(
         for (const selector of decl.selector.split(/\s*,\s*/).map((s: string) => s.trim())) {
           // Split class and only keep the last modifier
           let [klass, ...modifiers] = selector.slice(1).split(':')
+          klass = klass.replaceAll('\\', '')
           klass = [klass, ...modifiers.slice(0, -1)].join(':')
           const modifier = modifiers.at(-1)
 
@@ -344,7 +345,7 @@ export async function finalizePage(
             continue
           }
 
-          const replacement = compressedMap.get(klass.replaceAll('\\', ''))
+          const replacement = compressedMap.get(klass)?.replaceAll('@', '\\@')
 
           if (replacement) {
             if (modifier) {
