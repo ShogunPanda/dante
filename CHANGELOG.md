@@ -1,3 +1,10 @@
+### 2023-11-22 / 0.25.0
+
+- chore: Updated docs.
+- feat: Updated create template.
+- feat: Improved CSS handling.
+- fix: CSS Fixes.
+
 ### 2023-11-21 / 0.24.1
 
 - fix: Better error handling.
