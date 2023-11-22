@@ -14,16 +14,12 @@ import stringify from 'rehype-stringify'
 import { type Processor, type Transformer } from 'unified'
 import { type Node } from 'unist'
 import { visit } from 'unist-util-visit'
-import { type VFile } from 'vfile'
-import { type BuildContext } from './models.js'
+import { type BuildContext, type CSSClassGeneratorContext } from './models.js'
 
 interface CompressCSSClassesPluginOptions {
   safelist?: string[]
-}
-
-interface CSSClassGeneratorContext {
-  name: string
-  counter: number
+  compressedClasses?: Map<string, string>
+  generator?: CSSClassGeneratorContext
 }
 
 type Rehype = Processor<Root, undefined, undefined, Root, string>
@@ -53,20 +49,14 @@ function cssClass(context: CSSClassGeneratorContext): void {
       str = cssClassAlphabet.charAt(index - 1) + str
     } while (i >= 1)
 
-    context.name = str
+    context.name = `${context.prefix ?? ''}${str}`
 
     // Avoid some combinations
   } while (cssForbiddenClasses.has(context.name))
 }
 
-function extractCSSClassesPlugin(_a: object): Transformer {
-  return (tree: Node, file: VFile) => {
-    const classes = new Set<string>()
-    const compressedClasses = new Map<string, string>()
-
-    file.data.classes = classes
-    file.data.compression = compressedClasses
-
+function extractCSSClassesPlugin(classes: Set<string>, _: object): Transformer {
+  return (tree: Node) => {
     visit(tree, 'element', (node: Element) => {
       for (const klass of (node.properties?.className as string[]) ?? []) {
         classes.add(klass)
@@ -75,43 +65,92 @@ function extractCSSClassesPlugin(_a: object): Transformer {
   }
 }
 
-function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {}): Transformer {
-  const safelist = new Set(options.safelist ?? [])
+export function compressCSSClasses(
+  expanded: string[],
+  compressedClasses: Map<string, string>,
+  safelist: Set<string>,
+  generator: CSSClassGeneratorContext
+): string[] {
+  const klasses = []
 
-  return (tree: Node, file: VFile) => {
-    const classGenerationContext: CSSClassGeneratorContext = { name: '', counter: 0 }
-    const classes = new Set<string>()
-    const compressedClasses = new Map<string, string>()
-
-    file.data.classes = classes
-    file.data.compression = compressedClasses
-
-    visit(tree, 'element', (node: Element) => {
-      const klasses = []
-
-      for (const klass of (node.properties?.className as string[]) ?? []) {
-        if (safelist.has(klass)) {
-          // Do not compress safelist classes
-          klasses.push(klass)
-          compressedClasses.set(klass, klass)
-        } else {
-          // Generate a new compressed class
-          if (!compressedClasses.has(klass)) {
-            cssClass(classGenerationContext)
-            const layerIndex = klass.indexOf('@')
-            const layer = layerIndex !== -1 ? klass.substring(0, layerIndex) + '@' : ''
-            compressedClasses.set(klass, layer + classGenerationContext.name)
-          }
-
-          // Replace the class
-          klasses.push(compressedClasses.get(klass)!)
-        }
+  for (const klass of expanded) {
+    if (safelist.has(klass)) {
+      // Do not compress safelist classes
+      klasses.push(klass)
+      compressedClasses.set(klass, klass)
+    } else {
+      // Generate a new compressed class
+      if (!compressedClasses.has(klass)) {
+        cssClass(generator)
+        const layerIndex = klass.indexOf('@')
+        const layer = layerIndex !== -1 ? klass.substring(0, layerIndex) + '@' : ''
+        compressedClasses.set(klass, layer + generator.name)
       }
+
+      // Replace the class
+      klasses.push(compressedClasses.get(klass)!)
+    }
+  }
+
+  return klasses
+}
+
+function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {}): Transformer {
+  const compressedClasses = options.compressedClasses ?? new Map<string, string>()
+  const safelist = new Set(options.safelist ?? [])
+  const generator: CSSClassGeneratorContext = options.generator ?? { name: '', counter: 0 }
+
+  return function (tree: Node) {
+    visit(tree, 'element', (node: Element) => {
+      const klasses = compressCSSClasses(
+        (node.properties?.className as string[]) ?? [],
+        compressedClasses,
+        safelist,
+        generator
+      )
 
       if (klasses.length) {
         node.properties.className = klasses
       }
     })
+  }
+}
+
+function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, safelist: string[], decl: Rule): void {
+  if (!decl.selector.startsWith('.')) {
+    return
+  }
+
+  const newSelector: string[] = []
+  for (const selector of decl.selector.split(/\s+,\s+/).map((s: string) => s.trim())) {
+    // Split class and only keep the last modifier
+    let [klass, ...modifiers] = selector.slice(1).split(':')
+    klass = klass.replaceAll('\\', '').replaceAll(' ', '_')
+    klass = [klass, ...modifiers.slice(0, -1)].join(':')
+    const modifier = modifiers.at(-1)
+
+    if (safelist.includes(klass)) {
+      newSelector.push(selector)
+      continue
+    }
+
+    const replacement = compressedClasses.get(klass)?.replaceAll('@', '\\@')
+
+    if (replacement) {
+      if (modifier) {
+        newSelector.push(`.${replacement}:${modifier}`)
+      } else {
+        newSelector.push(`.${replacement}`)
+      }
+    } else {
+      decl.remove()
+    }
+  }
+
+  if (newSelector.length) {
+    decl.selector = newSelector.join(',')
+  } else {
+    decl.remove()
   }
 }
 
@@ -274,13 +313,11 @@ export function expandClasses(classes: ClassesExpansions, klasses?: string): str
 }
 
 export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
-  // First of all, extract classes and put them into the big list, which will only be processed once
-  const parsedContents = await rehype().use(extractCSSClassesPlugin, {}).process(contents)
-  const allClasses = parsedContents.data.classes as Set<string>
+  const cssClasses =
+    typeof context.css.classes === 'function' ? await context.css.classes(context) : context.css.classes
 
-  for (const klass of allClasses) {
-    context.cssClasses.add(klass)
-  }
+  // First of all, extract classes and put them into the big list, which will only be processed once
+  await rehype().use(extractCSSClassesPlugin.bind(null, cssClasses), {}).process(contents)
 
   return '@import "/style.css";'
 }
@@ -302,68 +339,38 @@ export async function createStylesheet(
 }
 
 // Compress each CSS class in the contents, then purged the CSS and finally replace the placeholder
-export async function finalizePage(
+export async function finalizePageCSS(
   context: BuildContext,
   contents: string,
   stylesheet: string,
   safelist: string[] = []
 ): Promise<string> {
-  const css = context.removeUnusedCss ? await purgeCss(contents, stylesheet) : stylesheet
+  const css = context.css.removeUnused ? await purgeCss(contents, stylesheet) : stylesheet
 
   // First of all, replace all classes with their compressed version
   let pipeline = rehype()
 
-  if (!context.keepExpandedCss) {
-    pipeline = pipeline.use(compressCSSClassesPlugin, { safelist }) as unknown as Rehype
+  const compressedClasses =
+    typeof context.css.compressedClasses === 'function'
+      ? await context.css.compressedClasses(context)
+      : context.css.compressedClasses
+
+  if (!context.css.keepExpanded) {
+    const generator =
+      typeof context.css.generator === 'function' ? await context.css.generator(context) : context.css.generator
+
+    pipeline = pipeline.use(compressCSSClassesPlugin, { safelist, compressedClasses, generator }) as unknown as Rehype
   }
 
   const compressedContents = await pipeline.use(stringify).process(contents)
 
-  const compressedMap = compressedContents.data.compression as Map<string, string>
-
   // Now grab the CSS and replace the same classes again
   const postCssRules = []
 
-  if (!context.keepExpandedCss) {
+  if (!context.css.keepExpanded) {
     postCssRules.push({
       postcssPlugin: 'dante.compressor',
-      Rule(decl: Rule) {
-        if (!decl.selector.startsWith('.')) {
-          return
-        }
-
-        const newSelector: string[] = []
-        for (const selector of decl.selector.split(/\s*,\s*/).map((s: string) => s.trim())) {
-          // Split class and only keep the last modifier
-          let [klass, ...modifiers] = selector.slice(1).split(':')
-          klass = klass.replaceAll('\\', '')
-          klass = [klass, ...modifiers.slice(0, -1)].join(':')
-          const modifier = modifiers.at(-1)
-
-          if (safelist.includes(klass)) {
-            newSelector.push(selector)
-            continue
-          }
-
-          const replacement = compressedMap.get(klass)?.replaceAll('@', '\\@')
-
-          if (replacement) {
-            if (modifier) {
-              newSelector.push(`.${replacement}:${modifier}`)
-            } else {
-              newSelector.push(`.${replacement}`)
-            }
-          } else {
-            decl.remove()
-          }
-        }
-
-        if (newSelector.length) {
-          decl.selector = newSelector.join(',')
-        } else {
-          decl.remove()
-        }
-      }
+      Rule: replaceCSSClassesPlugin.bind(null, compressedClasses, safelist)
     })
   }
 

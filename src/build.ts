@@ -5,7 +5,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
-import { finalizePage } from './css.js'
+import { finalizePageCSS } from './css.js'
 import { baseTemporaryDirectory, buildFilePath, danteDir, resolveSwc, rootDir, type BuildContext } from './models.js'
 import { notifyBuildStatus } from './server.js'
 
@@ -14,7 +14,9 @@ export function elapsed(start: bigint): string {
 }
 
 function serializeError(error: Buffer | Error): string {
-  return error
+  const description = Buffer.isBuffer(error) ? error.toString() : error.stack!
+
+  return description
     .toString()
     .trim()
     .replaceAll(/(^.)/gm, '$1'.padStart(4, ' '))
@@ -97,10 +99,11 @@ export async function builder(context: BuildContext): Promise<void> {
     const pages = await glob(resolve(fullOutput, '**/*.html'))
 
     for (const page of pages) {
+      context.currentPage = page
       const stylesheet: string = await createStylesheet(context, page, true)
-      const finalSafelist = typeof safelist === 'function' ? await safelist(context, page) : safelist
+      const finalSafelist = typeof safelist === 'function' ? await safelist(context) : safelist
 
-      let finalized = await finalizePage(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
+      let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
 
       if (!context.isProduction) {
         finalized = finalized.replace(

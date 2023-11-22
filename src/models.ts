@@ -5,16 +5,28 @@ import type pino from 'pino'
 
 export type Mode = 'development' | 'production'
 
+type ValueOrCallback<T> = T | ((context: BuildContext) => Promise<T>)
+
+export interface CSSClassGeneratorContext {
+  prefix?: string
+  name: string
+  counter: number
+}
+
 export interface BuildContext {
   version: string
   logger: pino.Logger
   isProduction: boolean
   root: string
-  cssClasses: Set<string>
-  safelist: string[]
-  keepExpandedCss: boolean
-  removeUnusedCss: boolean
-  extensions?: any
+  currentPage?: string
+  css: {
+    keepExpanded: boolean
+    removeUnused: boolean
+    classes: ValueOrCallback<Set<string>>
+    compressedClasses: ValueOrCallback<Map<string, string>>
+    generator: ValueOrCallback<CSSClassGeneratorContext>
+  }
+  extensions: any
 }
 
 export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
@@ -47,12 +59,7 @@ export function buildFilePath(): string {
   return resolve(rootDir, baseTemporaryDirectory, 'build/index.js')
 }
 
-export function createBuildContext(
-  logger: pino.Logger,
-  isProduction: boolean,
-  root: string,
-  safelist: string[] = []
-): BuildContext {
+export function createBuildContext(logger: pino.Logger, isProduction: boolean, root: string): BuildContext {
   return {
     version: new Date()
       .toISOString()
@@ -61,9 +68,13 @@ export function createBuildContext(
     logger,
     isProduction,
     root,
-    cssClasses: new Set(),
-    safelist,
-    keepExpandedCss: !isProduction,
-    removeUnusedCss: isProduction
+    css: {
+      keepExpanded: !isProduction,
+      removeUnused: isProduction,
+      classes: new Set(),
+      compressedClasses: new Map<string, string>(),
+      generator: { name: '', counter: 0 }
+    },
+    extensions: {}
   }
 }
