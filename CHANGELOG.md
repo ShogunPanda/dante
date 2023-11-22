@@ -1,3 +1,7 @@
+### 2023-11-22 / 0.25.2
+
+- fix: Export missing type.
+
 ### 2023-11-22 / 0.25.1
 
 - fix: Fixed type.
