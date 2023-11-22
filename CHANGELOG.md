@@ -1,3 +1,7 @@
+### 2023-11-22 / 0.25.1
+
+- fix: Fixed type.
+
 ### 2023-11-22 / 0.25.0
 
 - chore: Updated docs.
