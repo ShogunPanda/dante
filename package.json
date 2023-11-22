@@ -1,6 +1,6 @@
 {
   "name": "dante",
-  "version": "0.26.0",
+  "version": "0.25.2",
   "description": "Opinionated static site generator.",
   "homepage": "https://sw.cowtech.it/dante",
   "repository": "github:ShogunPanda/dante",
@@ -28,7 +28,10 @@
   "exports": {
     ".": "./dist/index.js",
     "./cli": "./dist/cli.js",
-    "./html-utils": "./dist/lib/html-utils/html_utils.js"
+    "./html-utils": {
+      "import": "./dist/lib/html-utils/html_utils.js",
+      "types": "./dist/lib/html-utils/html_utils.d.ts"
+    }
   },
   "types": "./dist/index.d.ts",
   "scripts": {
