@@ -1,6 +1,5 @@
 import { createGenerator, type UserConfig } from '@unocss/core'
 import { transformDirectives } from '@unocss/transformer-directives'
-import { type Element, type Root } from 'hast'
 import MagicString from 'magic-string'
 import postcss, { type Rule } from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
@@ -9,104 +8,14 @@ import postcssMinifySelector from 'postcss-minify-selectors'
 import postcssNested from 'postcss-nested'
 import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
 import { PurgeCSS } from 'purgecss'
-import { rehype } from 'rehype'
-import stringify from 'rehype-stringify'
-import { type Processor, type Transformer } from 'unified'
-import { type Node } from 'unist'
-import { visit } from 'unist-util-visit'
 // @ts-expect-error This will be present at runtime
-import { extractCSSClasses } from './lib/html-utils/html_utils.js'
-import { type BuildContext, type CSSClassGeneratorContext } from './models.js'
+import { compressCSSClassesInHTML, extractCSSClasses } from './lib/html-utils/html_utils.js'
+import { type BuildContext } from './models.js'
 
-interface CompressCSSClassesPluginOptions {
-  safelist?: string[]
-  compressedClasses?: Map<string, string>
-  generator?: CSSClassGeneratorContext
-}
-
-type Rehype = Processor<Root, undefined, undefined, Root, string>
 type CSSImporter = (id: string) => Promise<string | null>
 
 type InternalClassesExpansions = Record<string, Set<string>>
 export type ClassesExpansions = Record<string, string[]>
-
-const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
-const cssClassAlphabetLength = cssClassAlphabet.length
-const cssForbiddenClasses = new Set(['ad'])
-
-function cssClass(context: CSSClassGeneratorContext): void {
-  do {
-    let i = ++context.counter
-    let str = ''
-
-    do {
-      let index = i % cssClassAlphabetLength
-      i = i / cssClassAlphabetLength
-
-      if (index - 1 === -1) {
-        index = cssClassAlphabetLength
-        i--
-      }
-
-      str = cssClassAlphabet.charAt(index - 1) + str
-    } while (i >= 1)
-
-    context.name = `${context.prefix ?? ''}${str}`
-
-    // Avoid some combinations
-  } while (cssForbiddenClasses.has(context.name))
-}
-
-export function compressCSSClasses(
-  expanded: string[],
-  compressedClasses: Map<string, string>,
-  safelist: Set<string>,
-  generator: CSSClassGeneratorContext
-): string[] {
-  const klasses = []
-
-  for (const klass of expanded) {
-    if (safelist.has(klass)) {
-      // Do not compress safelist classes
-      klasses.push(klass)
-      compressedClasses.set(klass, klass)
-    } else {
-      // Generate a new compressed class
-      if (!compressedClasses.has(klass)) {
-        cssClass(generator)
-        const layerIndex = klass.indexOf('@')
-        const layer = layerIndex !== -1 ? klass.substring(0, layerIndex) + '@' : ''
-        compressedClasses.set(klass, layer + generator.name)
-      }
-
-      // Replace the class
-      klasses.push(compressedClasses.get(klass)!)
-    }
-  }
-
-  return klasses
-}
-
-function compressCSSClassesPlugin(options: CompressCSSClassesPluginOptions = {}): Transformer {
-  const compressedClasses = options.compressedClasses ?? new Map<string, string>()
-  const safelist = new Set(options.safelist ?? [])
-  const generator: CSSClassGeneratorContext = options.generator ?? { name: '', counter: 0 }
-
-  return function (tree: Node) {
-    visit(tree, 'element', (node: Element) => {
-      const klasses = compressCSSClasses(
-        (node.properties?.className as string[]) ?? [],
-        compressedClasses,
-        safelist,
-        generator
-      )
-
-      if (klasses.length) {
-        node.properties.className = klasses
-      }
-    })
-  }
-}
 
 function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, safelist: string[], decl: Rule): void {
   if (!decl.selector.startsWith('.')) {
@@ -338,9 +247,8 @@ export async function finalizePageCSS(
 ): Promise<string> {
   const css = context.css.removeUnused ? await purgeCss(contents, stylesheet) : stylesheet
 
-  // TODO@PI: Move into Rust using https://github.com/cloudflare/lol-html
   // First of all, replace all classes with their compressed version
-  let pipeline = rehype()
+  let compressedContents = contents
 
   const compressedClasses =
     typeof context.css.compressedClasses === 'function'
@@ -348,13 +256,26 @@ export async function finalizePageCSS(
       : context.css.compressedClasses
 
   if (!context.css.keepExpanded) {
+    const compressedLayers =
+      typeof context.css.compressedLayers === 'function'
+        ? await context.css.compressedLayers(context)
+        : context.css.compressedLayers
+
     const generator =
       typeof context.css.generator === 'function' ? await context.css.generator(context) : context.css.generator
 
-    pipeline = pipeline.use(compressCSSClassesPlugin, { safelist, compressedClasses, generator }) as unknown as Rehype
-  }
+    const [counter, transformed] = compressCSSClassesInHTML(
+      contents,
+      compressedClasses,
+      compressedLayers,
+      new Set(safelist),
+      generator.counter,
+      generator.prefix ?? ''
+    )
 
-  const compressedContents = await pipeline.use(stringify).process(contents)
+    compressedContents = transformed
+    generator.counter = counter
+  }
 
   // Now grab the CSS and replace the same classes again
   const postCssRules = []

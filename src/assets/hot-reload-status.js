@@ -12,14 +12,17 @@
 
       switch (update.status) {
         case 'pending':
+          document.title = 'Building'
           pendingMessage.classList.remove('hidden')
           errorContainer.classList.add('hidden')
           errorContents.innerHTML = ''
           break
         case 'success':
+          document.title = 'Compilation succeeded'
           setTimeout(() => location.reload(), 1000)
           break
         case 'failed':
+          document.title = 'Compilation failed'
           pendingMessage.classList.add('hidden')
           errorContainer.classList.remove('hidden')
           errorContents.innerHTML = update.payload.error

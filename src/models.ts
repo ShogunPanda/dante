@@ -24,6 +24,7 @@ export interface BuildContext {
     removeUnused: boolean
     classes: ValueOrCallback<Set<string>>
     compressedClasses: ValueOrCallback<Map<string, string>>
+    compressedLayers: ValueOrCallback<Map<string, string>>
     generator: ValueOrCallback<CSSClassGeneratorContext>
   }
   extensions: any
@@ -73,6 +74,7 @@ export function createBuildContext(logger: pino.Logger, isProduction: boolean, r
       removeUnused: isProduction,
       classes: new Set(),
       compressedClasses: new Map<string, string>(),
+      compressedLayers: new Map<string, string>(),
       generator: { name: '', counter: 0 }
     },
     extensions: {}
