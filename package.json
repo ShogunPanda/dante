@@ -35,7 +35,7 @@
   },
   "types": "./dist/index.d.ts",
   "scripts": {
-    "predev": "rm -rf dist && mkdir dist && cp -a src/assets src/templates dist && npm run build:html-utils",
+    "predev": "npm run prebuild",
     "dev": "swc -s -w -d dist src",
     "prebuild": "rm -rf dist && mkdir dist && cp -a src/assets src/templates dist && npm run build:html-utils",
     "build": "swc -d dist src",
