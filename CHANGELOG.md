@@ -1,3 +1,8 @@
+### 2023-11-29 / 0.27.0
+
+- feat: Added syntax highlighting.
+- feat: Replace rehype with lol-html in WASM.
+
 ### 2023-11-22 / 0.26.1
 
 - fix: Fixed exporting.
