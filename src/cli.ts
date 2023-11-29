@@ -7,6 +7,7 @@ import pino from 'pino'
 import { builder, compileSourceCode } from './build.js'
 import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.js'
 import { localServer } from './server.js'
+import { initializeSyntaxHighlighting } from './syntax-highlighting.js'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
@@ -52,6 +53,7 @@ program
       const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
       await compileSourceCode(logger)
+      await initializeSyntaxHighlighting(logger)
       const server = await localServer({ ip, port, logger: false, isProduction: false, staticDir: absoluteStaticDir })
       const protocol = existsSync(resolve(rootDir, 'ssl')) ? 'https' : 'http'
       const address = server.server.address()! as AddressInfo
@@ -76,6 +78,7 @@ program
       const buildContext = createBuildContext(logger, true, absoluteStaticDir)
 
       await compileSourceCode(logger)
+      await initializeSyntaxHighlighting(logger)
       await builder(buildContext)
     } catch (error) {
       logger.error(error)

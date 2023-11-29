@@ -25,6 +25,8 @@ function serializeError(error: Buffer | Error): string {
 }
 
 export async function compileSourceCode(logger?: pino.Logger): Promise<void> {
+  logger?.info('Compiling Typescript ...')
+
   const operationStart = process.hrtime.bigint()
 
   let success: () => void

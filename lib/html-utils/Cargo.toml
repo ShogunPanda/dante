@@ -11,7 +11,7 @@
   crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-  console_error_panic_hook = { version = "0.1.7", optional = true }
+  console_error_panic_hook = { version = "0.1.7" }
   getrandom                = { version = "0.2", features = ["js"] }
   js-sys                   = "0.3.64"
   lol_html                 = "1.2.0"

@@ -1,4 +1,7 @@
+extern crate console_error_panic_hook;
+
 use std::collections::{HashMap, HashSet};
+use std::panic;
 
 use js_sys::{Array, JsString, Map, Set};
 use lol_html::{element, HtmlRewriter, Settings};
@@ -13,7 +16,7 @@ const CSS_CLASS_ALPHABET: [char; 26] = [
 const CSS_CLASS_ALPHABET_LENGTH: i32 = 26;
 
 fn import_array(source: &Array) -> Vec<String> {
-  let mut destination = Vec::new();
+  let mut destination = vec![];
 
   for value in source.iter() {
     destination.push(value.as_string().unwrap());
@@ -97,7 +100,7 @@ fn compress_css_classes_internal(
   counter: &mut i32,
   prefix: &String,
 ) -> Vec<String> {
-  let mut klasses = Vec::new();
+  let mut klasses = vec![];
 
   for klass in expanded {
     // Safelist, leave untouched
@@ -256,6 +259,9 @@ pub fn compress_css_classes_html(
   array.push(&JsString::from(String::from_utf8(output).unwrap()));
   array
 }
+
+#[wasm_bindgen(start)]
+fn start() { panic::set_hook(Box::new(console_error_panic_hook::hook)); }
 
 #[wasm_bindgen]
 extern "C" {
