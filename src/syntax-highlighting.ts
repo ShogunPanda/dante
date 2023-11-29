@@ -18,7 +18,6 @@ export const preloadedLanguages = [
 
 export const preloadedThemes = ['one-dark-pro']
 
-// TODO@PI: Replace with syntect via WASM and move into dante
 const highlightersCache = new Map<string, Highlighter>()
 
 // Add support for the command grammar
