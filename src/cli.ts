@@ -29,7 +29,7 @@ if (process.env.DANTE_CLI_PATH) {
 program
   .name(programName)
   .description(programDescription)
-  .version(packageInfo.version, '-V, --version', 'Show version number')
+  .version(packageInfo.version as string, '-V, --version', 'Show version number')
   .helpOption('-h, --help', 'Show this help')
   .addHelpCommand(false)
   .showSuggestionAfterError(true)
@@ -49,7 +49,7 @@ program
   .action(async function devAction(this: Command): Promise<void> {
     try {
       const { ip, port, directory: staticDir } = this.optsWithGlobals()
-      const absoluteStaticDir = resolve(rootDir, staticDir)
+      const absoluteStaticDir = resolve(rootDir, staticDir as string)
       const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
       await compileSourceCode(logger)
@@ -74,7 +74,7 @@ program
   .action(async function buildAction(this: Command): Promise<void> {
     try {
       const { directory: staticDir } = this.optsWithGlobals()
-      const absoluteStaticDir = resolve(rootDir, staticDir)
+      const absoluteStaticDir = resolve(rootDir, staticDir as string)
       const buildContext = createBuildContext(logger, true, absoluteStaticDir)
 
       await compileSourceCode(logger)
@@ -103,7 +103,7 @@ program
         port,
         logger,
         isProduction: true,
-        staticDir: resolve(rootDir, staticDir)
+        staticDir: resolve(rootDir, staticDir as string)
       })
     } catch (error) {
       logger.error(error)

@@ -96,7 +96,7 @@ program
   .name('create-dante-site')
   .arguments('<name>   [directory]')
   .description('Initializes a dante site.')
-  .version(packageInfo.version, '-V, --version', 'Show version number')
+  .version(packageInfo.version as string, '-V, --version', 'Show version number')
   .helpOption('-h, --help', 'Show this help')
   .addHelpCommand(false)
   .showSuggestionAfterError(true)

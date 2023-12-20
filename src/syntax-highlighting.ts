@@ -68,7 +68,7 @@ async function createHighlighter(language: string, theme: string): Promise<Highl
 
   if (!highlighter) {
     highlighter = await getHighlighter({ langs: [language as unknown as Lang], themes: [theme] })
-    await highlighter.loadLanguage(consoleGrammar as any)
+    await highlighter.loadLanguage(consoleGrammar as unknown as Lang)
     highlightersCache.set(cacheKey, highlighter)
   }
 

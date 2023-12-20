@@ -103,7 +103,7 @@ export async function builder(context: BuildContext): Promise<void> {
     for (const page of pages) {
       context.currentPage = page
       const stylesheet: string = await createStylesheet(context, page, true)
-      const finalSafelist = typeof safelist === 'function' ? await safelist(context) : safelist
+      const finalSafelist: string[] = typeof safelist === 'function' ? await safelist(context) : safelist
 
       let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
 
@@ -120,7 +120,7 @@ export async function builder(context: BuildContext): Promise<void> {
     context.logger.info(`Building completed in ${elapsed(operationStart)} ms.`)
     notifyBuildStatus('success')
   } catch (error) {
-    const errorString = serializeError(error)
+    const errorString = serializeError(error as Error)
     context.logger.error(`Building failed after ${elapsed(operationStart)} ms:\n\n  ${errorString}\n`)
     notifyBuildStatus('failed', { message: 'Building failed', error: errorString })
   }

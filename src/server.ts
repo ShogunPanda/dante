@@ -114,7 +114,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
 
   const { serverDir, setupServer } = await import(buildFilePath())
 
-  const root = resolve(...[staticDir, serverDir].filter(s => s))
+  const root = resolve(...[staticDir, serverDir as string].filter(s => s))
   await mkdir(root, { recursive: true })
 
   const server = fastify({
