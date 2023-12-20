@@ -91,7 +91,7 @@ export function notifyBuildStatus(status: 'pending' | 'success' | 'failed', payl
   buildEmitter.emit('update')
 }
 
-function syncHandler(this: FastifyInstance, _: FastifyRequest, reply: FastifyReply): void {
+function syncHandler(_: FastifyRequest, reply: FastifyReply): void {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   reply
     .header('content-type', 'text/event-stream')
