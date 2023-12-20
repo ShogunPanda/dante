@@ -1,3 +1,9 @@
+### 2023-12-20 / 0.28.0
+
+- chore: Updated dependencies.
+- chore: Minor improvement.
+- chore: Removed outdated TODO.
+
 ### 2023-11-29 / 0.27.0
 
 - feat: Added syntax highlighting.
