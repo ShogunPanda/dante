@@ -1,3 +1,7 @@
+### 2023-12-26 / 0.29.1
+
+- fix: Fixed type.
+
 ### 2023-12-26 / 0.29.0
 
 - feat: Reworked CSS implementation.
