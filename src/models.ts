@@ -41,7 +41,7 @@ export interface ServerResult {
   directory: string
 }
 
-export type ServerFunction = (server: FastifyInstance, context: BuildContext) => ServerResult | Promise<ServerResult>
+export type ServerFunction = (server: FastifyInstance, isProduction?: boolean) => ServerResult | Promise<ServerResult>
 
 export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()

@@ -124,7 +124,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
     https,
     logger: logger ?? { transport: { target: 'pino-pretty' } },
     forceCloseConnections: true
-  })
+  }) as unknown as FastifyInstance
 
   if (setupServer && typeof setupServer === 'function') {
     const { directory } = await setupServer(server, isProduction)
