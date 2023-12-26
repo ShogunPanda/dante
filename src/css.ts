@@ -10,8 +10,7 @@ import { type BuildContext } from './models.js'
 
 type InternalClassesExpansions = Record<string, Set<string>>
 export type ClassesExpansions = Record<string, string[]>
-
-type CSSClassesResolver = (klasses?: string | string[]) => string
+export type CSSClassesResolver = (klasses?: string | string[]) => string
 
 const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
 const cssClassAlphabetLength = cssClassAlphabet.length
