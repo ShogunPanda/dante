@@ -1,3 +1,8 @@
+### 2023-12-26 / 0.29.0
+
+- feat: Reworked CSS implementation.
+- fix: Minor fix.
+
 ### 2023-12-20 / 0.28.0
 
 - chore: Updated dependencies.
