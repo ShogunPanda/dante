@@ -6,7 +6,15 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
 import { finalizePageCSS } from './css.js'
-import { baseTemporaryDirectory, buildFilePath, danteDir, resolveSwc, rootDir, type BuildContext } from './models.js'
+import {
+  baseTemporaryDirectory,
+  buildFilePath,
+  danteDir,
+  resolveSwc,
+  rootDir,
+  type BuildContext,
+  type BuildFunction
+} from './models.js'
 import { notifyBuildStatus } from './server.js'
 
 export function elapsed(start: bigint): string {
@@ -66,8 +74,8 @@ export async function compileSourceCode(logger?: pino.Logger): Promise<void> {
 }
 
 async function generateHotReloadPage(): Promise<string> {
-  const page = await readFile(fileURLToPath(new URL('assets/status.html', import.meta.url)), 'utf8')
-  const client = await readFile(fileURLToPath(new URL('assets/hot-reload-status.js', import.meta.url)), 'utf8')
+  const page = await readFile(fileURLToPath(new URL('assets/status-page.html', import.meta.url)), 'utf8')
+  const client = await readFile(fileURLToPath(new URL('assets/status-page.js', import.meta.url)), 'utf8')
 
   const minifiedClient = await minify(client, { compress: true, mangle: false })
   return page.replace('</body>', `<script type="text/javascript">${minifiedClient.code}</script></body>`)
@@ -87,25 +95,24 @@ export async function builder(context: BuildContext): Promise<void> {
 
     if (!context.isProduction) {
       hotReloadClient = await minify(
-        await readFile(fileURLToPath(new URL('assets/hot-reload-trigger.js', import.meta.url)), 'utf8')
+        await readFile(fileURLToPath(new URL('assets/hot-reload.js', import.meta.url)), 'utf8')
       )
       await writeFile(resolve(rootDir, baseTemporaryDirectory, '__status.html'), await generateHotReloadPage(), 'utf8')
     }
 
     // Perform the build
-    const { build, createStylesheet, safelist } = await import(buildFilePath())
-
-    await build(context)
+    const { build }: { build: BuildFunction } = await import(buildFilePath())
+    const { css, cssConfig } = await build(context)
 
     // Now, for each generated page, replace the @import class with the production CSS
     const pages = await glob(resolve(fullOutput, '**/*.html'))
 
     for (const page of pages) {
       context.currentPage = page
-      const stylesheet: string = await createStylesheet(context, page, true)
-      const finalSafelist: string[] = typeof safelist === 'function' ? await safelist(context) : safelist
 
-      let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), stylesheet, finalSafelist)
+      const finalCss = css ? (typeof css === 'function' ? await css(context) : css) : ''
+
+      let finalized = await finalizePageCSS(context, cssConfig, await readFile(page, 'utf8'), finalCss)
 
       if (!context.isProduction) {
         finalized = finalized.replace(

@@ -3,21 +3,21 @@ import { transformDirectives } from '@unocss/transformer-directives'
 import MagicString from 'magic-string'
 import postcss, { type Rule } from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
-import postcssImport from 'postcss-import'
 import postcssMinifySelector from 'postcss-minify-selectors'
 import postcssNested from 'postcss-nested'
 import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
-import { PurgeCSS } from 'purgecss'
-// @ts-expect-error This will be present at runtime
-import { compressCSSClassesInHTML, extractCSSClasses } from './lib/html-utils/html_utils.js'
 import { type BuildContext } from './models.js'
-
-type CSSImporter = (id: string) => Promise<string | null>
 
 type InternalClassesExpansions = Record<string, Set<string>>
 export type ClassesExpansions = Record<string, string[]>
 
-function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, safelist: string[], decl: Rule): void {
+type CSSClassesResolver = (klasses?: string | string[]) => string
+
+const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
+const cssClassAlphabetLength = cssClassAlphabet.length
+const cssForbiddenClasses = new Set(['ad'])
+
+function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, decl: Rule): void {
   if (!decl.selector.startsWith('.')) {
     return
   }
@@ -25,17 +25,14 @@ function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, safelis
   const newSelector: string[] = []
   for (const selector of decl.selector.split(/\s+,\s+/).map((s: string) => s.trim())) {
     // Split class and only keep the last modifier
-    let [klass, ...modifiers] = selector.slice(1).split(':')
-    klass = klass.replaceAll('\\', '').replaceAll(' ', '_')
-    klass = [klass, ...modifiers.slice(0, -1)].join(':')
-    const modifier = modifiers.at(-1)
-
-    if (safelist.includes(klass)) {
-      newSelector.push(selector)
-      continue
+    const components = selector.slice(1).split(':')
+    let modifier: string = ''
+    if (components.length > 1) {
+      modifier = components.pop()!
     }
+    const klass = components.join(':')
 
-    const replacement = compressedClasses.get(klass)?.replaceAll('@', '\\@')
+    const replacement = compressedClasses.get(klass.replaceAll('\\', ''))
 
     if (replacement) {
       if (modifier) {
@@ -66,53 +63,7 @@ export async function transformCSS(config: UserConfig, css: string): Promise<str
   return code.toString()
 }
 
-async function finalizeCSS(css: string, minify: boolean, cssImporter: CSSImporter): Promise<string> {
-  const processed = await postcss([
-    postcssImport({
-      resolve(id: string): string {
-        return `/handled/${id}`
-      },
-      async load(id: string): Promise<string> {
-        id = id.replace(/^\/handled\//, '')
-
-        const imported = await cssImporter(id)
-
-        return imported ?? `/*!!! not-found: ${id} */`
-      }
-    }),
-    postcssNested(),
-    ...(minify
-      ? [postcssDiscardComments({ removeAll: true }), postcssNormalizeWhitespace(), postcssMinifySelector()]
-      : [])
-  ]).process(css, {
-    from: 'input.css',
-    to: 'output.css'
-  })
-
-  return processed.css
-}
-
-export async function purgeCss(html: string, css: string): Promise<string> {
-  const result = await new PurgeCSS().purge({
-    content: [
-      {
-        raw: html,
-        extension: 'html'
-      }
-    ],
-    css: [
-      {
-        raw: css
-      }
-    ],
-    safelist: [/[!#@$:[\\]./],
-    variables: false
-  })
-
-  return result[0].css
-}
-
-export async function loadClassesExpansion(css: string, applyLayer: boolean = false): Promise<ClassesExpansions> {
+export async function loadCSSClassesExpansion(css: string): Promise<ClassesExpansions> {
   // Load classes from the classes file
   const unserializedClass: InternalClassesExpansions = {}
 
@@ -120,7 +71,7 @@ export async function loadClassesExpansion(css: string, applyLayer: boolean = fa
   await postcss([
     postcssNested(),
     {
-      postcssPlugin: 'dante.classes-expansion',
+      postcssPlugin: 'dante.classes-expansion-loader',
       Rule(decl: Rule) {
         // If not a class selector, ignore it
         if (!decl.selector.startsWith('.')) {
@@ -140,29 +91,26 @@ export async function loadClassesExpansion(css: string, applyLayer: boolean = fa
 
         // For each selector of this rule
         for (const selector of decl.selectors) {
-          const layer = applyLayer && selector.includes('@') ? selector.slice(1).split('@')[0] + '@' : ''
-
-          // Split modifiers
-          const [selectorClean, afterOrBeforePart] = selector.slice(1).split('::')
-          const [klass, ...modifiers] = selectorClean.split(':')
-          const afterOrBefore = afterOrBeforePart ? `::${afterOrBeforePart}` : ''
+          // Split modifiers of the rule
+          const [klass, pseudoComponent] = selector.slice(1).split(':')
+          const pseudo = pseudoComponent ? `${pseudoComponent}:` : ''
 
           if (!localClasses[klass]) {
-            localClasses[klass + afterOrBefore] = new Set()
+            localClasses[klass] = new Set()
           }
 
-          // No modifier, just set the rule untouch
-          if (!modifiers.length) {
-            for (const rule of rules) {
-              localClasses[klass + afterOrBefore].add(layer + rule)
+          // Now apply the rule using also the pseudo selectors
+          for (const rule of rules) {
+            let [layer, cleanRule] = rule.split('@')
+
+            if (!cleanRule) {
+              cleanRule = layer
+              layer = ''
+            } else {
+              layer += '@'
             }
-          } else {
-            // For each modifier, apply the rule with the modifier as prefix
-            for (const modifier of modifiers) {
-              for (const rule of rules) {
-                localClasses[klass + afterOrBefore].add(layer + [modifier, rule].filter(Boolean).join('-'))
-              }
-            }
+
+            localClasses[klass].add(layer + pseudo + cleanRule)
           }
         }
 
@@ -185,18 +133,64 @@ export async function loadClassesExpansion(css: string, applyLayer: boolean = fa
 
   const classes: ClassesExpansions = {}
 
-  for (const [compressed, expanded] of Object.entries(unserializedClass)) {
-    const allExpansions = [...expanded]
+  for (const [id, expansions] of Object.entries(unserializedClass)) {
+    const allExpansions = [...expansions]
 
     if (allExpansions.length) {
-      classes[compressed] = allExpansions
+      classes[id] = allExpansions
     }
   }
 
   return classes
 }
 
-export function expandClasses(classes: ClassesExpansions, klasses?: string): string {
+export function compressCssClass(context: BuildContext, expanded: string): string {
+  const previous = context.css.compressedClasses.get(expanded)
+
+  if (previous) {
+    return previous
+  }
+
+  let name = ''
+  let state = context.css.compressionState
+
+  // Generate the unique class
+  do {
+    let i = ++state
+    name = ''
+
+    do {
+      let index = i % cssClassAlphabetLength
+      i = i / cssClassAlphabetLength
+
+      if (index - 1 === -1) {
+        index = cssClassAlphabetLength
+        i--
+      }
+
+      name = cssClassAlphabet.charAt(index - 1) + name
+    } while (i >= 1)
+
+    // Avoid some combinations
+  } while (cssForbiddenClasses.has(name))
+
+  context.css.compressionState = state
+  context.css.compressedClasses.set(expanded, name)
+  return name
+}
+
+export function expandCSSClasses(
+  context: BuildContext,
+  classes: ClassesExpansions,
+  klasses?: string | string[]
+): string {
+  if (Array.isArray(klasses)) {
+    klasses = klasses
+      .flat(Number.MAX_SAFE_INTEGER)
+      .filter(k => k)
+      .join(' ')
+  }
+
   let current = ''
   let replaced = klasses ?? ''
 
@@ -206,96 +200,81 @@ export function expandClasses(classes: ClassesExpansions, klasses?: string): str
     // For each input class
     replaced = current
       .split(' ')
-      .flatMap(klass => classes[klass] ?? klass)
+      .flatMap(klass => {
+        return classes[klass] ?? klass
+      })
       .join(' ')
   }
 
-  return replaced
-}
+  let expanded = Array.from(new Set(replaced.split(' ')))
 
-export async function prepareStyles(context: BuildContext, contents: string): Promise<string> {
-  const cssClasses =
-    typeof context.css.classes === 'function' ? await context.css.classes(context) : context.css.classes
-
-  extractCSSClasses(cssClasses, contents)
-
-  return '@import "/style.css";'
-}
-
-export async function createStylesheet(
-  cssConfig: UserConfig,
-  classes: Set<string>,
-  minify: boolean,
-  cssImporter: CSSImporter,
-  leadingCss: string = ''
-): Promise<string> {
-  // Generate the CSS out of the classes
-  const generator = createGenerator({ ...cssConfig, mergeSelectors: false })
-
-  const commonCss = await transformCSS(cssConfig, leadingCss)
-  const { css: generatedCss } = await generator.generate(classes)
-
-  return finalizeCSS(commonCss + generatedCss, minify, cssImporter)
-}
-
-// Compress each CSS class in the contents, then purged the CSS and finally replace the placeholder
-export async function finalizePageCSS(
-  context: BuildContext,
-  contents: string,
-  stylesheet: string,
-  safelist: string[] = []
-): Promise<string> {
-  const css = context.css.removeUnused ? await purgeCss(contents, stylesheet) : stylesheet
-
-  // First of all, replace all classes with their compressed version
-  let compressedContents = contents
-
-  const compressedClasses =
-    typeof context.css.compressedClasses === 'function'
-      ? await context.css.compressedClasses(context)
-      : context.css.compressedClasses
-
-  if (!context.css.keepExpanded) {
-    const compressedLayers =
-      typeof context.css.compressedLayers === 'function'
-        ? await context.css.compressedLayers(context)
-        : context.css.compressedLayers
-
-    const generator =
-      typeof context.css.generator === 'function' ? await context.css.generator(context) : context.css.generator
-
-    const [counter, transformed] = compressCSSClassesInHTML(
-      contents,
-      compressedClasses,
-      compressedLayers,
-      new Set(safelist),
-      generator.counter,
-      generator.prefix ?? ''
-    )
-
-    compressedContents = transformed
-    generator.counter = counter
+  // Register all classes
+  for (const klass of expanded) {
+    context.css.currentClasses.add(klass)
   }
 
-  // Now grab the CSS and replace the same classes again
-  const postCssRules = []
+  // If classes compression is enabled, perform the replacement now
+  if (!context.css.keepExpanded) {
+    expanded = expanded.map(klass => {
+      return compressCssClass(context, klass)
+    })
+  }
+
+  return expanded.join(' ')
+}
+
+export function createCSSClassesResolver(context: BuildContext, classes: ClassesExpansions): CSSClassesResolver {
+  context.css.currentClasses = new Set()
+  context.css.compressedClasses = new Map()
+  context.css.compressionState = 0
+  return expandCSSClasses.bind(null, context, classes)
+}
+
+export function serializeCSSClasses(context: BuildContext): Record<string, string> {
+  return {
+    'data-dante-css-classes': Array.from(context.css.currentClasses).join(' ')
+  }
+}
+
+export async function finalizePageCSS(
+  context: BuildContext,
+  cssConfig: UserConfig,
+  contents: string,
+  headingCss: string
+): Promise<string> {
+  // First of all, extract the classes
+  const matcher = /<style data-dante-css-classes="([^"]+)"(?:\/>|>.*<\/style>)/
+  const mo = contents.match(matcher)
+
+  if (!mo) {
+    return contents
+  }
+
+  const classes = mo[1].split(' ')
+
+  // Generate the CSS out of the heading CSS and the CSS classes
+  headingCss = await transformCSS(cssConfig, headingCss)
+  const generator = createGenerator({ ...cssConfig, mergeSelectors: false })
+  const { css: generatedCss } = await generator.generate(classes)
+
+  const postCssRules = [
+    postcssNested(),
+    postcssDiscardComments({ removeAll: true }),
+    postcssNormalizeWhitespace(),
+    postcssMinifySelector()
+  ]
 
   if (!context.css.keepExpanded) {
     postCssRules.push({
       postcssPlugin: 'dante.compressor',
-      Rule: replaceCSSClassesPlugin.bind(null, compressedClasses, safelist)
+      Rule: replaceCSSClassesPlugin.bind(null, context.css.compressedClasses)
     })
   }
 
-  const compressedCss = await postcss(postCssRules).process(css, {
+  const { css } = await postcss(postCssRules).process(`${headingCss}\n${generatedCss}`, {
     from: 'input.css',
     to: 'output.css'
   })
 
-  return compressedContents
-    .toString()
-    .replace(
-      '<style data-dante-placeholder="style">@import "/style.css";</style>',
-      `<style>${compressedCss.css}</style>`
-    )
+  return contents.replace(matcher, `<style>${css}</style>`)
 }

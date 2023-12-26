@@ -24,18 +24,20 @@ Simply create all file needed in the `build` function in `src/build/index.ts`. Y
 
 We strongly recommend to use the `createFile` function exported from `dante` to create file as it will take care of replacing `$hash` in the file name with the actual file hash.
 
-Also, in order to correctly apply production optimizations, call and await the provided `after` callback after done building your site.
+The function must return an object containing the following properties:
 
-Your `src/build/index.ts` must export the following members:
+- `cssConfig`: A `@unocss/core` configuration. This is the only required property.
+- `css`: A css to be injected in each generated HTML page.
 
-- `build`: A function that creates all website files.
-- `createStylesheet`: A function that converts a list of CSS classes in CSS code. Inside use of `createStylesheet` function exported from `dante` is encouraged.
-- `safelist`: A list of CSS classes that you always to be present in any page and that will not be compressed.
+All properties can be (async) function that will be called for each page at runtime.
 
-It can also optionally export the following members:
+### Customizing the server
 
-- `serverDir`: A subdirectory in the dist folder to server HTML files from.
-- `setupServer`: A function that receives a fastify server instance and build context. You can use this to add new behavior to the server.
+If you want to customize the local server, you can create a `setupServer` function in `src/build/server.ts`. The function will receive a fastify server instance and build context.
+
+The function can optionally return an object containing the following properties:
+
+- `directory`: A subdirectory in the dist folder to server HTML files from.
 
 ### Exporting
 
@@ -54,6 +56,7 @@ The function will received a [commander](https://npm.im/commander) program and a
 ### Environments variables
 
 - `DANTE_BUILD_FILE_PATH`: The build file path. Default is `src/build/index.ts`.
+- `DANTE_SERVER_FILE_PATH`: The server file path. Default is `src/build/server.ts`.
 - `DANTE_CLI_PATH`: The CLI customization file path. Default is `src/build/cli.ts`.
 - `DANTE_CREATE_PATH`: The CLI customization file path. Default is `src/build/create.ts`.
 - `DANTE_BASE_TEMPORARY_DIRECTORY`: The local directory in which transpile TypeScript files before building. Default is `.dante`.

@@ -7,7 +7,7 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
-import { baseTemporaryDirectory, buildFilePath, rootDir } from './models.js'
+import { baseTemporaryDirectory, rootDir, serverFilePath } from './models.js'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -112,10 +112,8 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
       }
     : null
 
-  const { serverDir, setupServer } = await import(buildFilePath())
-
-  const root = resolve(...[staticDir, serverDir as string].filter(s => s))
-  await mkdir(root, { recursive: true })
+  let serverDir: string = ''
+  const { setupServer } = await import(serverFilePath())
 
   const server = fastify({
     https,
@@ -124,8 +122,12 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   })
 
   if (typeof setupServer === 'function') {
-    await setupServer(server, isProduction)
+    const { directory } = await setupServer(server, isProduction)
+    serverDir = directory
   }
+
+  const root = resolve(...[staticDir, serverDir].filter(s => s))
+  await mkdir(root, { recursive: true })
 
   await server.register(fastifyStatic, { root, decorateReply: true, index: ['index.html', 'index.htm'] })
   server.decorate('rootDir', root)

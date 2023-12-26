@@ -1,3 +1,5 @@
+import { type UserConfig } from '@unocss/core'
+import { type FastifyInstance } from 'fastify'
 import { glob } from 'glob'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -21,14 +23,26 @@ export interface BuildContext {
   currentPage?: string
   css: {
     keepExpanded: boolean
-    removeUnused: boolean
-    classes: ValueOrCallback<Set<string>>
-    compressedClasses: ValueOrCallback<Map<string, string>>
-    compressedLayers: ValueOrCallback<Map<string, string>>
-    generator: ValueOrCallback<CSSClassGeneratorContext>
+    currentClasses: Set<string>
+    compressedClasses: Map<string, string>
+    compressionState: number
   }
   extensions: any
 }
+
+export interface BuildResult {
+  cssConfig: UserConfig
+  css?: (context: BuildContext) => string | Promise<string>
+  // safelist?: string[] | ((context: BuildContext) => string[] | Promise<string[]>)
+}
+
+export type BuildFunction = (context: BuildContext) => BuildResult | Promise<BuildResult>
+
+export interface ServerResult {
+  directory: string
+}
+
+export type ServerFunction = (server: FastifyInstance, context: BuildContext) => ServerResult | Promise<ServerResult>
 
 export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()
@@ -60,6 +74,14 @@ export function buildFilePath(): string {
   return resolve(rootDir, baseTemporaryDirectory, 'build/index.js')
 }
 
+export function serverFilePath(): string {
+  if (process.env.DANTE_SERVER_FILE_PATH) {
+    return resolve(rootDir, process.env.DANTE_SERVER_FILE_PATH)
+  }
+
+  return resolve(rootDir, baseTemporaryDirectory, 'build/server.js')
+}
+
 export function createBuildContext(logger: pino.Logger, isProduction: boolean, root: string): BuildContext {
   return {
     version: new Date()
@@ -71,11 +93,9 @@ export function createBuildContext(logger: pino.Logger, isProduction: boolean, r
     root,
     css: {
       keepExpanded: !isProduction,
-      removeUnused: isProduction,
-      classes: new Set(),
+      currentClasses: new Set(),
       compressedClasses: new Map<string, string>(),
-      compressedLayers: new Map<string, string>(),
-      generator: { name: '', counter: 0 }
+      compressionState: 0
     },
     extensions: {}
   }
