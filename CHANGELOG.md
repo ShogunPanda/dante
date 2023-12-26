@@ -1,3 +1,7 @@
+### 2023-12-26 / 0.31.0
+
+- feat: Make server export optional.
+
 ### 2023-12-26 / 0.30.0
 
 - feat: Make server export optional.
