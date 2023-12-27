@@ -127,8 +127,11 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   }) as unknown as FastifyInstance
 
   if (setupServer && typeof setupServer === 'function') {
-    const { directory } = await setupServer(server, isProduction)
-    serverDir = directory
+    const result = await setupServer(server, isProduction)
+
+    if (result?.directory) {
+      serverDir = result.directory
+    }
   }
 
   const root = resolve(...[staticDir, serverDir].filter(s => s))
