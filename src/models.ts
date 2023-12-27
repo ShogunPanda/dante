@@ -31,8 +31,8 @@ export interface BuildContext {
 }
 
 export interface BuildResult {
-  cssConfig: UserConfig
-  css?: string | ((context: BuildContext) => string | Promise<string>)
+  cssConfig: ValueOrCallback<UserConfig>
+  css?: ValueOrCallback<string>
 }
 
 export type BuildFunction = (context: BuildContext) => BuildResult | Promise<BuildResult>
