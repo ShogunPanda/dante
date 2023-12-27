@@ -1,3 +1,8 @@
+### 2023-12-27 / 0.35.0
+
+- feat: Allow userConfig to be a function.
+- chore: Commented code.
+
 ### 2023-12-27 / 0.34.1
 
 - fix: Do not recompress compressed classes.
