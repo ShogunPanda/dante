@@ -1,3 +1,7 @@
+### 2023-12-27 / 0.33.0
+
+- fix: Make server result optional.
+
 ### 2023-12-27 / 0.32.1
 
 - fix: Fixed classes tokenizing.
