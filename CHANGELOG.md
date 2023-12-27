@@ -1,3 +1,7 @@
+### 2023-12-27 / 0.34.1
+
+- fix: Do not recompress compressed classes.
+
 ### 2023-12-27 / 0.34.0
 
 - feat: Export tokenizeCssClasses function.
