@@ -186,6 +186,9 @@ export function compressCssClass(context: BuildContext, expanded: string): strin
 
   context.css.compressionState = state
   context.css.compressedClasses.set(expanded, name)
+
+  // This is done to avoid recompressing a compressed class
+  context.css.compressedClasses.set(name, name)
   return name
 }
 
