@@ -1,3 +1,7 @@
+### 2023-12-27 / 0.32.0
+
+- feat: Improved CSS class expander.
+
 ### 2023-12-26 / 0.31.0
 
 - feat: Make server export optional.
