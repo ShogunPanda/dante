@@ -52,7 +52,7 @@ function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, decl: R
   }
 }
 
-function tokenizeCssClasses(klass: (CSSClassToken | CSSClassToken[])[]): string[] {
+export function tokenizeCssClasses(klass: (CSSClassToken | CSSClassToken[])[]): string[] {
   return klass
     .flat(Number.MAX_SAFE_INTEGER)
     .filter(k => k)
