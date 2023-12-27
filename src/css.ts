@@ -10,7 +10,8 @@ import { type BuildContext } from './models.js'
 
 type InternalClassesExpansions = Record<string, Set<string>>
 export type ClassesExpansions = Record<string, string[]>
-export type CSSClassesResolver = (klasses?: string | string[]) => string
+export type CSSClassToken = string | false | undefined | null
+export type CSSClassesResolver = (...klasses: (CSSClassToken | CSSClassToken[])[]) => string
 
 const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
 const cssClassAlphabetLength = cssClassAlphabet.length
@@ -181,31 +182,26 @@ export function compressCssClass(context: BuildContext, expanded: string): strin
 export function expandCSSClasses(
   context: BuildContext,
   classes: ClassesExpansions,
-  klasses?: string | string[]
+  ...klasses: (CSSClassToken | CSSClassToken[])[]
 ): string {
-  if (Array.isArray(klasses)) {
-    klasses = klasses
-      .flat(Number.MAX_SAFE_INTEGER)
-      .filter(k => k)
-      .join(' ')
+  let replaced = klasses.flat(Number.MAX_SAFE_INTEGER).filter(k => k) as (string | string[])[]
+  let changed = true
+
+  while (changed) {
+    changed = false
+    replaced = replaced.flat(Number.MAX_SAFE_INTEGER).map(klass => {
+      const replacement = classes[klass as string]
+
+      if (replacement) {
+        changed = true
+        return replacement
+      } else {
+        return klass
+      }
+    })
   }
 
-  let current = ''
-  let replaced = klasses ?? ''
-
-  while (replaced !== current) {
-    current = replaced
-
-    // For each input class
-    replaced = current
-      .split(' ')
-      .flatMap(klass => {
-        return classes[klass] ?? klass
-      })
-      .join(' ')
-  }
-
-  let expanded = Array.from(new Set(replaced.split(' ')))
+  let expanded = Array.from(new Set(replaced.flat(Number.MAX_SAFE_INTEGER))) as string[]
 
   // Register all classes
   for (const klass of expanded) {
