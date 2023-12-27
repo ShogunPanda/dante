@@ -1,3 +1,7 @@
+### 2023-12-27 / 0.32.1
+
+- fix: Fixed classes tokenizing.
+
 ### 2023-12-27 / 0.32.0
 
 - feat: Improved CSS class expander.
