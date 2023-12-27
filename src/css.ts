@@ -52,6 +52,16 @@ function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, decl: R
   }
 }
 
+function tokenizeCssClasses(klass: (CSSClassToken | CSSClassToken[])[]): string[] {
+  return klass
+    .flat(Number.MAX_SAFE_INTEGER)
+    .filter(k => k)
+    .map(k => (k as string).split(' '))
+    .flat(Number.MAX_SAFE_INTEGER)
+    .map(k => (k as string).trim())
+    .filter(k => k)
+}
+
 export async function transformCSS(config: UserConfig, css: string): Promise<string> {
   // Create a generator
   const generator = createGenerator(config)
@@ -184,13 +194,13 @@ export function expandCSSClasses(
   classes: ClassesExpansions,
   ...klasses: (CSSClassToken | CSSClassToken[])[]
 ): string {
-  let replaced = klasses.flat(Number.MAX_SAFE_INTEGER).filter(k => k) as (string | string[])[]
+  let replaced = klasses
   let changed = true
 
   while (changed) {
     changed = false
-    replaced = replaced.flat(Number.MAX_SAFE_INTEGER).map(klass => {
-      const replacement = classes[klass as string]
+    replaced = tokenizeCssClasses(replaced).map(klass => {
+      const replacement = classes[klass]
 
       if (replacement) {
         changed = true
@@ -201,7 +211,7 @@ export function expandCSSClasses(
     })
   }
 
-  let expanded = Array.from(new Set(replaced.flat(Number.MAX_SAFE_INTEGER))) as string[]
+  let expanded = Array.from(new Set(tokenizeCssClasses(replaced)))
 
   // Register all classes
   for (const klass of expanded) {
