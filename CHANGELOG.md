@@ -1,3 +1,7 @@
+### 2023-12-27 / 0.34.0
+
+- feat: Export tokenizeCssClasses function.
+
 ### 2023-12-27 / 0.33.0
 
 - fix: Make server result optional.
