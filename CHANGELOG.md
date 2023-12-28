@@ -1,3 +1,7 @@
+### 2023-12-28 / 0.35.1
+
+- fix: Correctly handle pseudoclasses.
+
 ### 2023-12-27 / 0.35.0
 
 - feat: Allow userConfig to be a function.
