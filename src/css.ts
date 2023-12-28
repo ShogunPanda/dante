@@ -24,22 +24,12 @@ function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, decl: R
 
   const newSelector: string[] = []
   for (const selector of decl.selector.split(/\s+,\s+/).map((s: string) => s.trim())) {
-    // Split class and only keep the last modifier
-    const components = selector.slice(1).split(':')
-    let modifier: string = ''
-    if (components.length > 1) {
-      modifier = components.pop()!
-    }
-    const klass = components.join(':')
-
-    const replacement = compressedClasses.get(klass.replaceAll('\\', ''))
+    const [, rawClass, modifier] = selector.slice(1).match(/^(.+?)(:{1,2}[^:]+)?$/)!
+    const klass = rawClass.replaceAll('\\', '')
+    const replacement = compressedClasses.get(klass)
 
     if (replacement) {
-      if (modifier) {
-        newSelector.push(`.${replacement}:${modifier}`)
-      } else {
-        newSelector.push(`.${replacement}`)
-      }
+      newSelector.push(`.${replacement}${modifier ?? ''}`)
     } else {
       decl.remove()
     }
