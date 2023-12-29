@@ -1,4 +1,5 @@
 import { type UserConfig } from '@unocss/core'
+import { type Theme } from '@unocss/preset-mini'
 import { type FastifyInstance } from 'fastify'
 import { glob } from 'glob'
 import { resolve } from 'node:path'
@@ -31,7 +32,7 @@ export interface BuildContext {
 }
 
 export interface BuildResult {
-  cssConfig: ValueOrCallback<UserConfig>
+  cssConfig: ValueOrCallback<UserConfig<Theme>>
   css?: ValueOrCallback<string>
 }
 
