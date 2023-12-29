@@ -1,3 +1,8 @@
+### 2023-12-29 / 0.36.0
+
+- feat: Improved type.
+- chore: Removed leftover.
+
 ### 2023-12-28 / 0.35.1
 
 - fix: Correctly handle pseudoclasses.
