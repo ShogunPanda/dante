@@ -67,7 +67,6 @@
   },
   "devDependencies": {
     "@cowtech/eslint-config": "^9.0.0",
-    "@types/glob": "^8.1.0",
     "@types/node": "^20.10.5",
     "@types/postcss-import": "^14.0.3",
     "concurrently": "^8.2.2",
