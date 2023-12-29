@@ -1,3 +1,7 @@
+### 2023-12-29 / 0.37.0
+
+- fix: Removed outdated type.
+
 ### 2023-12-29 / 0.36.0
 
 - feat: Improved type.
