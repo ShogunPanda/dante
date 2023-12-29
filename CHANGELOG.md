@@ -1,3 +1,7 @@
+### 2023-12-29 / 0.38.0
+
+- chore: Updated dependencies.
+
 ### 2023-12-29 / 0.37.0
 
 - fix: Removed outdated type.
