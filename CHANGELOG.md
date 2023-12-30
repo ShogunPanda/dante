@@ -1,3 +1,9 @@
+### 2023-12-30 / 0.39.0
+
+- feat: Improved status page.
+- chore: Updated TypeScript configuration.
+- chore: Updated TypeScript configuration.
+
 ### 2023-12-29 / 0.38.0
 
 - chore: Updated dependencies.
