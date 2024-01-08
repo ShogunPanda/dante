@@ -132,6 +132,7 @@ export async function renderCode(
 
   let i = 0
   const ranges = parseRanges(highlight)
+  const hasRanges = ranges.length > 0
 
   return renderToHtml(tokens, {
     elements: {
@@ -159,7 +160,7 @@ export async function renderCode(
           }
         }
 
-        if (!highlighted) {
+        if (hasRanges && !highlighted) {
           baseClass += ` ${classes.lineNotHighlighted}`
         }
 
