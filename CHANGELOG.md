@@ -6,6 +6,10 @@
 
 - feat!: Renamed under scope.
 
+### 2024-01-08 / 0.40.0
+
+- feat!: Renamed under scope.
+
 ### 2023-12-30 / 0.39.0
 
 - feat: Improved status page.
