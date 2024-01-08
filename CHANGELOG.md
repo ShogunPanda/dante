@@ -1,3 +1,7 @@
+### 2024-01-08 / 0.40.2
+
+- fix: Only hide when highlighting.
+
 ### 2024-01-08 / 0.40.1
 
 - chore: Fixed README.
