@@ -1,3 +1,7 @@
+### 2024-01-08 / 0.40.1
+
+- chore: Fixed README.
+
 ### 2024-01-08 / 0.40.0
 
 - feat!: Renamed under scope.
