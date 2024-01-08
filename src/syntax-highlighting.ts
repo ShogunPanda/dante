@@ -139,12 +139,14 @@ export async function renderCode(
         i++
         const nextRange = ranges[0]
         let baseClass = classes.line ?? ''
+        let highlighted = false
 
         // There is a range to higlight
         if (nextRange) {
           // We have to highlight
           if (nextRange[0] <= i && nextRange[1] >= i) {
             baseClass += ` ${classes.lineHighlighted}`
+            highlighted = true
 
             // If it was a single line, make sure we move to the next range
             if (nextRange[0] === nextRange[1]) {
@@ -155,6 +157,10 @@ export async function renderCode(
           } else if (nextRange[0] <= i) {
             ranges.shift()
           }
+        }
+
+        if (!highlighted) {
+          baseClass += ` ${classes.lineNotHighlighted}`
         }
 
         const lineNumberSpan = numbers ? `<span class="${classes.lineNumber ?? ''}">${i}</span>` : ''

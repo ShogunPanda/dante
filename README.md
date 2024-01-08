@@ -1,7 +1,7 @@
 # dante
 
-[![Version](https://img.shields.io/npm/v/dante.svg)](https://npm.im/dante)
-[![Dependencies](https://img.shields.io/librariesio/release/npm/dante)](https://libraries.io/npm/dante)
+[![Version](https://img.shields.io/npm/v/@perseveranza-pets/dante.svg)](https://npm.im/@perseveranza-pets/dante)
+[![Dependencies](https://img.shields.io/librariesio/release/npm/@perseveranza-pets/dante)](https://libraries.io/npm/@perseveranza-pets/dante)
 
 Opinionated static site generator.
 
@@ -10,7 +10,7 @@ http://sw.cowtech.it/dante
 ## Installation
 
 ```
-npx --package=dante -- create-dante-site my-site
+npx --package=@perseveranza-pets/dante -- create-dante-site my-site
 cd my-site
 npm install
 dante dev
