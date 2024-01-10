@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pino from 'pino'
 import { builder, compileSourceCode } from './build.js'
+import { downloadFonts } from './fonts.js'
 import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.js'
 import { localServer } from './server.js'
 import { initializeSyntaxHighlighting } from './syntax-highlighting.js'
@@ -105,6 +106,27 @@ program
         isProduction: true,
         staticDir: resolve(rootDir, staticDir as string)
       })
+    } catch (error) {
+      logger.error(error)
+      process.exit(1)
+    }
+  })
+
+program
+  .command('font <url...>')
+  .alias('f')
+  .option('-r, --ranges <ranges>', 'Comma separated list of ranges to include', '')
+  .action(async function fontAction(this: Command, urls: string[]): Promise<void> {
+    try {
+      const { ranges } = this.optsWithGlobals()
+      await downloadFonts(
+        logger,
+        urls,
+        ((ranges as string) ?? '')
+          .split(/\s*,\s*/)
+          .map(r => r.trim())
+          .filter(Boolean)
+      )
     } catch (error) {
       logger.error(error)
       process.exit(1)
