@@ -1,3 +1,7 @@
+### 2024-01-10 / 0.41.0
+
+- feat: Added fonts handling.
+
 ### 2024-01-08 / 0.40.2
 
 - fix: Only hide when highlighting.
