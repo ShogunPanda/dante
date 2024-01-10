@@ -13,15 +13,16 @@ export interface Fonts {
   ranges: Record<string, string>
   urls: string[]
   families: Record<string, FontFamily>
+  sources: Record<string, string>
 }
 
 export async function downloadFonts(logger: pino.Logger, urls: string[], whitelistedRanges: string[]): Promise<void> {
-  const fonts: Fonts = { ranges: {}, urls: [], families: {} }
+  const fonts: Fonts = { sources: {}, families: {}, urls: [], ranges: {} }
 
-  for (const url of urls) {
-    logger.info(`Downloading ${url} ...`)
+  for (const remoteUrl of urls) {
+    logger.info(`Downloading ${remoteUrl} ...`)
 
-    const res = await fetch(url, {
+    const res = await fetch(remoteUrl, {
       headers: {
         'user-agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -74,6 +75,8 @@ export async function downloadFonts(logger: pino.Logger, urls: string[], whiteli
             fonts.urls.push(url)
           }
 
+          fonts.sources[family] = remoteUrl
+
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           fonts.families[family] ??= {} as FontFamily
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -83,12 +86,12 @@ export async function downloadFonts(logger: pino.Logger, urls: string[], whiteli
         }
       }
     ]).process(message, { from: 'input.css', to: 'output.css' })
-
-    logger.info('Printing YAML representation of the fonts:\n')
-    setTimeout(() => {
-      console.log('---\n' + dump(fonts, { lineWidth: 1000 }))
-    }, 200)
   }
+
+  logger.info('YAML representation of the fonts:\n')
+  setTimeout(() => {
+    console.log('---\n' + dump(fonts, { lineWidth: 1000 }))
+  }, 200)
 }
 
 export async function loadFontsFile(path: string): Promise<Fonts> {
