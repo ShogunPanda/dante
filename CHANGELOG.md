@@ -1,3 +1,7 @@
+### 2024-01-10 / 0.42.0
+
+- feat: Added fonts sources.
+
 ### 2024-01-10 / 0.41.0
 
 - feat: Added fonts handling.
