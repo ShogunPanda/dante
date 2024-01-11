@@ -19,8 +19,13 @@ export interface Fonts {
 export async function downloadFonts(logger: pino.Logger, urls: string[], whitelistedRanges: string[]): Promise<void> {
   const fonts: Fonts = { sources: {}, families: {}, urls: [], ranges: {} }
 
-  for (const remoteUrl of urls) {
+  for (let remoteUrl of urls) {
     logger.info(`Downloading ${remoteUrl} ...`)
+
+    // When no scheme is given, we assume Google Fonts
+    if (!remoteUrl.startsWith('https://')) {
+      remoteUrl = `https://fonts.googleapis.com/css2?family=${remoteUrl}&display=swap`
+    }
 
     const res = await fetch(remoteUrl, {
       headers: {
