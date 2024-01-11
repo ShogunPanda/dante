@@ -1,3 +1,7 @@
+### 2024-01-11 / 0.43.0
+
+- feat: Assume Google Fonts when no full URL is given.
+
 ### 2024-01-10 / 0.42.0
 
 - feat: Added fonts sources.
