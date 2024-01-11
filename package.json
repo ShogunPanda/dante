@@ -1,6 +1,6 @@
 {
   "name": "@perseveranza-pets/dante",
-  "version": "0.42.0",
+  "version": "0.43.0",
   "description": "Opinionated static site generator.",
   "homepage": "https://sw.cowtech.it/dante",
   "repository": "github:ShogunPanda/dante",
