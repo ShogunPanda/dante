@@ -1,3 +1,7 @@
+### 2024-01-19 / 0.43.2
+
+- feat: Do not log when CSS class is missing in production.
+
 ### 2024-01-19 / 0.43.1
 
 - feat: Log when CSS class is missing in production.
