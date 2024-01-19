@@ -1,3 +1,7 @@
+### 2024-01-19 / 0.43.1
+
+- feat: Log when CSS class is missing in production.
+
 ### 2024-01-11 / 0.43.0
 
 - feat: Assume Google Fonts when no full URL is given.
