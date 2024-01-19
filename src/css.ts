@@ -203,10 +203,6 @@ export function expandCSSClasses(
         changed = true
         return replacement
       } else {
-        if (context.isProduction) {
-          context.logger.error(`Missing replacement for CSS class "${klass}".`)
-        }
-
         return klass
       }
     })
