@@ -1,3 +1,7 @@
+### 2024-01-24 / 0.44.0
+
+- feat: Added no language support for syntax highlighting.
+
 ### 2024-01-19 / 0.43.2
 
 - feat: Do not log when CSS class is missing in production.
