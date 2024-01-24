@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import pino from 'pino'
+import { pino } from 'pino'
 import { compileSourceCode } from './build.js'
 import { baseTemporaryDirectory, rootDir } from './models.js'
 
