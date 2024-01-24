@@ -1,3 +1,7 @@
+### 2024-01-24 / 0.44.1
+
+- chore: Updated dependencies.
+
 ### 2024-01-24 / 0.44.0
 
 - feat: Added no language support for syntax highlighting.
