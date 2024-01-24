@@ -3,6 +3,8 @@ import { getHighlighter, renderToHtml, type Highlighter, type Lang } from 'shiki
 import { elapsed } from './build.js'
 
 export const preloadedLanguages = [
+  'none',
+  'console',
   'javascript',
   'typescript',
   'json',
@@ -11,7 +13,6 @@ export const preloadedLanguages = [
   'html',
   'css',
   'markdown',
-  'console',
   'shell',
   'graphql'
 ]
@@ -62,13 +63,40 @@ const consoleGrammar = {
   }
 }
 
+const noneGrammar = {
+  id: 'none',
+  scopeName: 'source.none',
+  grammar: {
+    scopeName: 'source.none',
+    patterns: [
+      {
+        include: '#text'
+      }
+    ],
+    repository: {
+      text: {
+        patterns: [
+          {
+            match: '.+',
+            name: 'none'
+          }
+        ]
+      }
+    }
+  }
+}
+
 async function createHighlighter(language: string, theme: string): Promise<Highlighter> {
   const cacheKey = `${theme}:${language}`
   let highlighter = highlightersCache.get(cacheKey)
 
   if (!highlighter) {
-    highlighter = await getHighlighter({ langs: [language as unknown as Lang], themes: [theme] })
+    highlighter = await getHighlighter({
+      langs: language !== 'none' ? [language as unknown as Lang] : [],
+      themes: [theme]
+    })
     await highlighter.loadLanguage(consoleGrammar as unknown as Lang)
+    await highlighter.loadLanguage(noneGrammar as unknown as Lang)
     highlightersCache.set(cacheKey, highlighter)
   }
 
