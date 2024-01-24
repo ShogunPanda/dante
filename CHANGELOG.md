@@ -1,3 +1,7 @@
+### 2024-01-24 / 0.44.2
+
+- fix: Fixed package.json
+
 ### 2024-01-24 / 0.44.1
 
 - chore: Updated dependencies.
