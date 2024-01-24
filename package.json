@@ -3,7 +3,10 @@
   "version": "0.44.1",
   "description": "Opinionated static site generator.",
   "homepage": "https://sw.cowtech.it/dante",
-  "repository": "github:ShogunPanda/dante",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShogunPanda/dante.git"
+  },
   "keywords": [
     "slides"
   ],
