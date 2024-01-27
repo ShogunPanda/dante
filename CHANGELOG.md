@@ -1,3 +1,7 @@
+### 2024-01-27 / 0.45.0
+
+- feat: Use new shiki.
+
 ### 2024-01-24 / 0.44.3
 
 - fix: Downgrade @swc/cli.
