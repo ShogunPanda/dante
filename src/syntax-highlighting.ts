@@ -195,15 +195,17 @@ export async function renderCode(
       const children = tokens
         // TODO@PI: Font style
         .map(({ content, color }) => {
-          return `<span class="text-${color}">${content}</span>`
+          return `<span dante-code-element="true" class="text-${color}">${content}</span>`
         })
         .join('')
 
-      const lineNumberSpan = numbers ? `<span class="${classes.lineNumber ?? ''}">${lineNumber}</span>` : ''
+      const lineNumberSpan = numbers
+        ? `<span dante-code-element="true" class="${classes.lineNumber ?? ''}">${lineNumber}</span>`
+        : ''
 
-      return `<span class="${lineClasses.join(' ')}">${lineNumberSpan}${children}</span>`
+      return `<span dante-code-element="true" class="${lineClasses.join(' ')}">${lineNumberSpan}${children}</span>`
     })
     .join('\n')
 
-  return `<pre class="bg-${bg} text-${fg}">${html}</pre>`
+  return `<pre dante-code-element="true" class="bg-${bg} text-${fg}">${html}</pre>`
 }
