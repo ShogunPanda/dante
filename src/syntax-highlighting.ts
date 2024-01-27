@@ -203,12 +203,12 @@ export async function renderCode(
             }
 
             if (fontStyle & 2) {
-              // Bold {
+              // Bold
               spanClasses.push('font-bold')
             }
 
             if (fontStyle & 4) {
-              // Underline {
+              // Underline
               spanClasses.push('underline')
             }
           }
