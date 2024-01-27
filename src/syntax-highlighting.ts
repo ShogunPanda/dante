@@ -193,9 +193,27 @@ export async function renderCode(
       }
 
       const children = tokens
-        // TODO@PI: Font style
-        .map(({ content, color }) => {
-          return `<span dante-code-element="true" class="text-${color}">${content}</span>`
+        .map(({ content, color, fontStyle }) => {
+          const spanClasses = [`text-${color}`]
+
+          if (fontStyle) {
+            if (fontStyle & 1) {
+              // Italic
+              spanClasses.push('font-italic')
+            }
+
+            if (fontStyle & 2) {
+              // Bold {
+              spanClasses.push('font-bold')
+            }
+
+            if (fontStyle & 4) {
+              // Underline {
+              spanClasses.push('underline')
+            }
+          }
+
+          return `<span dante-code-element="true" class="${spanClasses.join(' ')}">${content}</span>`
         })
         .join('')
 
