@@ -1,3 +1,7 @@
+### 2024-01-27 / 0.45.1
+
+- fix: Strip leading paths from compilation.
+
 ### 2024-01-27 / 0.45.0
 
 - feat: Use new shiki.
