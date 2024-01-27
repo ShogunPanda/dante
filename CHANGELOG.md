@@ -1,3 +1,7 @@
+### 2024-01-27 / 0.47.0
+
+- feat: Consider font style for code.
+
 ### 2024-01-27 / 0.46.1
 
 - fix: Use specific task.
