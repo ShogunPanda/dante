@@ -1,3 +1,7 @@
+### 2024-01-27 / 0.46.1
+
+- fix: Use specific task.
+
 ### 2024-01-27 / 0.46.0
 
 - feat: Use special attribute for generate elements.
