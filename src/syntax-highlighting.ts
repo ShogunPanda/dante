@@ -1,5 +1,11 @@
 import { type pino } from 'pino'
-import { getHighlighter, renderToHtml, type Highlighter, type Lang } from 'shiki'
+import {
+  getHighlighter,
+  type Highlighter,
+  type LanguageRegistration,
+  type SpecialLanguage,
+  type SpecialTheme
+} from 'shiki'
 import { elapsed } from './build.js'
 
 export const preloadedLanguages = [
@@ -22,67 +28,59 @@ export const preloadedThemes = ['one-dark-pro']
 const highlightersCache = new Map<string, Highlighter>()
 
 // Add support for the command grammar
-const consoleGrammar = {
-  id: 'console',
+const consoleLanguage: LanguageRegistration = {
+  name: 'console',
   scopeName: 'source.console',
-  grammar: {
-    scopeName: 'source.console',
-    patterns: [{ include: '#command' }, { include: '#output' }],
-    repository: {
-      command: {
-        patterns: [
-          {
-            begin: '^[a-z-]+@[a-z-]+',
-            end: '\n',
-            name: 'string',
-            patterns: [
-              {
-                match: ':',
-                name: 'keyword.operator'
-              },
-              {
-                match: '~',
-                name: 'variable.function'
-              },
-              {
-                match: '\\$',
-                name: 'keyword.operator'
-              },
-              {
-                match: '.+',
-                name: 'punctuation.definition.bold'
-              }
-            ]
-          }
-        ]
-      },
-      output: {
-        patterns: [{ match: '.+', name: 'comment' }]
-      }
+  patterns: [
+    {
+      patterns: [
+        {
+          begin: '^[a-z-]+@[a-z-]+',
+          end: '\n',
+          name: 'string',
+          patterns: [
+            {
+              match: ':',
+              name: 'keyword.operator'
+            },
+            {
+              match: '~',
+              name: 'variable.function'
+            },
+            {
+              match: '\\$',
+              name: 'keyword.operator'
+            },
+            {
+              match: '.+',
+              name: 'punctuation.definition.bold'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      patterns: [{ match: '.+', name: 'comment' }]
     }
+  ],
+  repository: {
+    $self: {},
+    $base: {}
   }
 }
 
-const noneGrammar = {
-  id: 'none',
+const noneLanguage: LanguageRegistration = {
+  name: 'none',
   scopeName: 'source.none',
-  grammar: {
-    scopeName: 'source.none',
-    patterns: [
-      {
-        include: '#text'
-      }
-    ],
-    repository: {
-      text: {
-        patterns: [
-          {
-            match: '.+',
-            name: 'none'
-          }
-        ]
-      }
+  patterns: [
+    {
+      match: '.+',
+      name: 'none'
     }
+  ],
+  repository: {
+    $self: {},
+    $base: {}
   }
 }
 
@@ -92,11 +90,11 @@ async function createHighlighter(language: string, theme: string): Promise<Highl
 
   if (!highlighter) {
     highlighter = await getHighlighter({
-      langs: language !== 'none' ? [language as unknown as Lang] : [],
+      langs: language !== 'none' ? [language] : [],
       themes: [theme]
     })
-    await highlighter.loadLanguage(consoleGrammar as unknown as Lang)
-    await highlighter.loadLanguage(noneGrammar as unknown as Lang)
+    await highlighter.loadLanguage(consoleLanguage)
+    await highlighter.loadLanguage(noneLanguage)
     highlightersCache.set(cacheKey, highlighter)
   }
 
@@ -154,50 +152,58 @@ export async function renderCode(
   }
 
   const highlighter = await createHighlighter(language, theme)
-  const tokens = highlighter.codeToThemedTokens(code.trim(), language, theme, { includeExplanation: false })
+  const lines = highlighter.codeToThemedTokens(code.trim(), {
+    lang: language as SpecialLanguage,
+    theme: theme as SpecialTheme
+  })
 
   const { fg, bg } = highlighter.getTheme(theme)
 
-  let i = 0
   const ranges = parseRanges(highlight)
   const hasRanges = ranges.length > 0
 
-  return renderToHtml(tokens, {
-    elements: {
-      line({ className, children }: Record<string, unknown>): string {
-        i++
-        const nextRange = ranges[0]
-        let baseClass = classes.line ?? ''
-        let highlighted = false
+  const html = lines
+    .map((tokens, i) => {
+      const lineNumber = i + 1
+      const lineClasses = [classes.line]
 
-        // There is a range to higlight
-        if (nextRange) {
-          // We have to highlight
-          if (nextRange[0] <= i && nextRange[1] >= i) {
-            baseClass += ` ${classes.lineHighlighted}`
-            highlighted = true
+      // There is a range to higlight
+      const nextRange = ranges[0]
 
-            // If it was a single line, make sure we move to the next range
-            if (nextRange[0] === nextRange[1]) {
-              ranges.shift()
-            }
+      let highlighted = false
+      if (nextRange) {
+        // We have to highlight
+        if (nextRange[0] <= lineNumber && nextRange[1] >= i) {
+          lineClasses.push(classes.lineHighlighted)
+          highlighted = true
 
-            // We're past the previous range, look for the next one
-          } else if (nextRange[0] <= i) {
+          // If it was a single line, make sure we move to the next range
+          if (nextRange[0] === nextRange[1]) {
             ranges.shift()
           }
-        }
 
-        if (hasRanges && !highlighted) {
-          baseClass += ` ${classes.lineNotHighlighted}`
+          // We're past the previous range, look for the next one
+        } else if (nextRange[0] <= i) {
+          ranges.shift()
         }
-
-        const lineNumberSpan = numbers ? `<span class="${classes.lineNumber ?? ''}">${i}</span>` : ''
-        return `<span class="${className} ${baseClass.trim()}">${lineNumberSpan}${children}</span>`
       }
-    },
-    fg,
-    bg,
-    themeName: theme
-  }).replace('<pre class="', `<pre class="${classes.root ?? ''} `)
+
+      if (hasRanges && !highlighted) {
+        lineClasses.push(classes.lineNotHighlighted)
+      }
+
+      const children = tokens
+        // TODO@PI: Font style
+        .map(({ content, color }) => {
+          return `<span class="text-${color}">${content}</span>`
+        })
+        .join('')
+
+      const lineNumberSpan = numbers ? `<span class="${classes.lineNumber ?? ''}">${lineNumber}</span>` : ''
+
+      return `<span class="${lineClasses.join(' ')}">${lineNumberSpan}${children}</span>`
+    })
+    .join('\n')
+
+  return `<pre class="bg-${bg} text-${fg}">${html}</pre>`
 }
