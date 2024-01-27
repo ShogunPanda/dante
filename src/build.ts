@@ -46,7 +46,7 @@ export async function compileSourceCode(logger?: pino.Logger): Promise<void> {
   })
 
   const swc = await resolveSwc()
-  const compilation = spawn(swc, ['-d', baseTemporaryDirectory, 'src'])
+  const compilation = spawn(swc, ['--strip-leading-paths', '-d', baseTemporaryDirectory, 'src'])
   let error = Buffer.alloc(0)
 
   compilation.stderr.on('data', chunk => {
