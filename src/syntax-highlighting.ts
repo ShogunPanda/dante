@@ -207,5 +207,5 @@ export async function renderCode(
     })
     .join('\n')
 
-  return `<pre dante-code-element="true" class="bg-${bg} text-${fg}">${html}</pre>`
+  return `<pre dante-code-root="true" class="bg-${bg} text-${fg}">${html}</pre>`
 }
