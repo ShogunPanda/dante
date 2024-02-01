@@ -210,6 +210,10 @@ export function expandCSSClasses(
 
   let expanded = Array.from(new Set(tokenizeCssClasses(replaced)))
 
+  if (context.css.transformer) {
+    expanded = expanded.map(context.css.transformer)
+  }
+
   // Register all classes
   for (const klass of expanded) {
     context.css.currentClasses.add(klass)

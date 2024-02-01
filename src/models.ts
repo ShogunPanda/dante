@@ -10,6 +10,8 @@ export type Mode = 'development' | 'production'
 
 export type ValueOrCallback<T> = T | ((context: BuildContext) => T | Promise<T>)
 
+export type CssClassTransformer = (klass: string, index: number) => string
+
 export interface CSSClassGeneratorContext {
   prefix?: string
   name: string
@@ -24,6 +26,7 @@ export interface BuildContext {
   currentPage?: string
   css: {
     keepExpanded: boolean
+    transformer?: CssClassTransformer
     currentClasses: Set<string>
     compressedClasses: Map<string, string>
     compressionState: number
