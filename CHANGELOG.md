@@ -1,3 +1,7 @@
+### 2024-02-01 / 0.48.1
+
+- chore: Simplify syntax highlighting loading.
+
 ### 2024-02-01 / 0.48.0
 
 - feat: Allow CSS class transformiing before compression.
