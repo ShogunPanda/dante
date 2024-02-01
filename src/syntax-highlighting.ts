@@ -10,6 +10,20 @@ import {
 import { elapsed } from './build.js'
 
 let highlighter: Highlighter
+
+export const preloadedLanguages = [
+  'javascript',
+  'typescript',
+  'json',
+  'jsonc',
+  'rust',
+  'html',
+  'css',
+  'markdown',
+  'shell',
+  'graphql'
+]
+
 export const preloadedThemes = ['one-dark-pro']
 
 // Add some special grammars
@@ -68,7 +82,7 @@ export async function initializeSyntaxHighlighting(logger?: pino.Logger): Promis
   logger?.info('Preparing syntax highlighting ...')
   const operationStart = process.hrtime.bigint()
 
-  highlighter = await getHighlighter({ langs: [], themes: preloadedThemes })
+  highlighter = await getHighlighter({ langs: preloadedLanguages, themes: preloadedThemes })
   await highlighter.loadLanguage(outputLanguage)
   await highlighter.loadLanguage(noneLanguage)
 
