@@ -1,6 +1,7 @@
 import { type pino } from 'pino'
 import {
   getHighlighter,
+  type BundledLanguage,
   type Highlighter,
   type LanguageRegistration,
   type SpecialLanguage,
@@ -8,62 +9,46 @@ import {
 } from 'shiki'
 import { elapsed } from './build.js'
 
-export const preloadedLanguages = [
-  'none',
-  'console',
-  'javascript',
-  'typescript',
-  'json',
-  'jsonc',
-  'rust',
-  'html',
-  'css',
-  'markdown',
-  'shell',
-  'graphql'
-]
-
+let highlighter: Highlighter
 export const preloadedThemes = ['one-dark-pro']
 
-const highlightersCache = new Map<string, Highlighter>()
-
-// Add support for the command grammar
-const consoleLanguage: LanguageRegistration = {
-  name: 'console',
-  scopeName: 'source.console',
+// Add some special grammars
+const outputLanguage: LanguageRegistration = {
+  name: 'output',
+  scopeName: 'source.output',
   patterns: [
     {
-      patterns: [
-        {
-          begin: '^[a-z-]+@[a-z-]+',
-          end: '\n',
-          name: 'string',
-          patterns: [
-            {
-              match: ':',
-              name: 'keyword.operator'
-            },
-            {
-              match: '~',
-              name: 'variable.function'
-            },
-            {
-              match: '\\$',
-              name: 'keyword.operator'
-            },
-            {
-              match: '.+',
-              name: 'punctuation.definition.bold'
-            }
-          ]
-        }
-      ]
+      include: '#command'
     },
     {
       patterns: [{ match: '.+', name: 'comment' }]
     }
   ],
   repository: {
+    command: {
+      match: '^[a-z-]+@[a-z-]+',
+      begin: '^[a-z-]+@[a-z-]+',
+      end: '\n',
+      name: 'string',
+      patterns: [
+        {
+          match: ':',
+          name: 'keyword.operator'
+        },
+        {
+          match: '~',
+          name: 'variable.function'
+        },
+        {
+          match: '\\$',
+          name: 'keyword.operator'
+        },
+        {
+          match: '.+',
+          name: 'punctuation.definition.bold'
+        }
+      ]
+    },
     $self: {},
     $base: {}
   }
@@ -72,47 +57,20 @@ const consoleLanguage: LanguageRegistration = {
 const noneLanguage: LanguageRegistration = {
   name: 'none',
   scopeName: 'source.none',
-  patterns: [
-    {
-      match: '.+',
-      name: 'none'
-    }
-  ],
+  patterns: [],
   repository: {
     $self: {},
     $base: {}
   }
 }
 
-async function createHighlighter(language: string, theme: string): Promise<Highlighter> {
-  const cacheKey = `${theme}:${language}`
-  let highlighter = highlightersCache.get(cacheKey)
-
-  if (!highlighter) {
-    highlighter = await getHighlighter({
-      langs: language !== 'none' ? [language] : [],
-      themes: [theme]
-    })
-    await highlighter.loadLanguage(consoleLanguage)
-    await highlighter.loadLanguage(noneLanguage)
-    highlightersCache.set(cacheKey, highlighter)
-  }
-
-  return highlighter
-}
-
 export async function initializeSyntaxHighlighting(logger?: pino.Logger): Promise<void> {
   logger?.info('Preparing syntax highlighting ...')
   const operationStart = process.hrtime.bigint()
 
-  const combinations = []
-  for (const language of preloadedLanguages) {
-    for (const theme of preloadedThemes) {
-      combinations.push([language, theme])
-    }
-  }
-
-  await Promise.all(combinations.map(([language, theme]) => createHighlighter(language, theme)))
+  highlighter = await getHighlighter({ langs: [], themes: preloadedThemes })
+  await highlighter.loadLanguage(outputLanguage)
+  await highlighter.loadLanguage(noneLanguage)
 
   logger?.info(`Syntax highlighting prepared in ${elapsed(operationStart)} ms.`)
 }
@@ -151,11 +109,14 @@ export async function renderCode(
     language = 'javascript'
   }
 
-  const highlighter = await createHighlighter(language, theme)
   const lines = highlighter.codeToThemedTokens(code.trim(), {
     lang: language as SpecialLanguage,
     theme: theme as SpecialTheme
   })
+
+  if (highlighter.getLoadedLanguages().includes(language)) {
+    await highlighter.loadLanguage(language as BundledLanguage)
+  }
 
   const { fg, bg } = highlighter.getTheme(theme)
 
