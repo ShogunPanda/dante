@@ -1,3 +1,7 @@
+### 2024-02-01 / 0.48.3
+
+- fix: Improved output syntax highlighting.
+
 ### 2024-02-01 / 0.48.2
 
 - chore: Preload common languages.
