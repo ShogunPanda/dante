@@ -1,3 +1,8 @@
+### 2024-02-01 / 0.48.0
+
+- feat: Allow CSS class transformiing before compression.
+- fix: Fixed comments.
+
 ### 2024-01-27 / 0.47.0
 
 - feat: Consider font style for code.
