@@ -1,3 +1,7 @@
+### 2024-02-01 / 0.48.2
+
+- chore: Preload common languages.
+
 ### 2024-02-01 / 0.48.1
 
 - chore: Simplify syntax highlighting loading.
