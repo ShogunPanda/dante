@@ -101,14 +101,14 @@ export async function renderCode(
     language = 'javascript'
   }
 
+  if (!highlighter.getLoadedLanguages().includes(language)) {
+    await highlighter.loadLanguage(language as BundledLanguage)
+  }
+
   const lines = highlighter.codeToThemedTokens(code.trim(), {
     lang: language as SpecialLanguage,
     theme: theme as SpecialTheme
   })
-
-  if (!highlighter.getLoadedLanguages().includes(language)) {
-    await highlighter.loadLanguage(language as BundledLanguage)
-  }
 
   const { fg, bg } = highlighter.getTheme(theme)
 
