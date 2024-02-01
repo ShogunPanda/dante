@@ -1,3 +1,7 @@
+### 2024-02-01 / 0.48.4
+
+- fix: Minor fix.
+
 ### 2024-02-01 / 0.48.3
 
 - fix: Improved output syntax highlighting.
