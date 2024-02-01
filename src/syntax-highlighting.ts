@@ -11,19 +11,6 @@ import { elapsed } from './build.js'
 
 let highlighter: Highlighter
 
-export const preloadedLanguages = [
-  'javascript',
-  'typescript',
-  'json',
-  'jsonc',
-  'rust',
-  'html',
-  'css',
-  'markdown',
-  'shell',
-  'graphql'
-]
-
 export const preloadedThemes = ['one-dark-pro']
 
 // Add some special grammars
@@ -32,37 +19,28 @@ const outputLanguage: LanguageRegistration = {
   scopeName: 'source.output',
   patterns: [
     {
-      include: '#command'
-    },
-    {
-      patterns: [{ match: '.+', name: 'comment' }]
+      begin: '^([a-zA-Z0-9-]+@[a-zA-Z0-9-]+)(:)(~/[a-zA-Z0-9-]+)(\\$)(.+)',
+      end: '\n',
+      beginCaptures: {
+        1: {
+          name: 'string'
+        },
+        2: {
+          name: 'beginning.punctuation.definition.list.markdown.xi'
+        },
+        3: {
+          name: 'variable.function'
+        },
+        4: {
+          name: 'beginning.punctuation.definition.list.markdown.xi'
+        },
+        5: {
+          name: 'punctuation.definition.bold'
+        }
+      }
     }
   ],
   repository: {
-    command: {
-      match: '^[a-z-]+@[a-z-]+',
-      begin: '^[a-z-]+@[a-z-]+',
-      end: '\n',
-      name: 'string',
-      patterns: [
-        {
-          match: ':',
-          name: 'keyword.operator'
-        },
-        {
-          match: '~',
-          name: 'variable.function'
-        },
-        {
-          match: '\\$',
-          name: 'keyword.operator'
-        },
-        {
-          match: '.+',
-          name: 'punctuation.definition.bold'
-        }
-      ]
-    },
     $self: {},
     $base: {}
   }
@@ -82,7 +60,7 @@ export async function initializeSyntaxHighlighting(logger?: pino.Logger): Promis
   logger?.info('Preparing syntax highlighting ...')
   const operationStart = process.hrtime.bigint()
 
-  highlighter = await getHighlighter({ langs: preloadedLanguages, themes: preloadedThemes })
+  highlighter = await getHighlighter({ themes: preloadedThemes })
   await highlighter.loadLanguage(outputLanguage)
   await highlighter.loadLanguage(noneLanguage)
 
@@ -128,7 +106,7 @@ export async function renderCode(
     theme: theme as SpecialTheme
   })
 
-  if (highlighter.getLoadedLanguages().includes(language)) {
+  if (!highlighter.getLoadedLanguages().includes(language)) {
     await highlighter.loadLanguage(language as BundledLanguage)
   }
 
