@@ -1,3 +1,7 @@
+### 2024-02-03 / 0.49.0
+
+- feat: Added new code utility methods.
+
 ### 2024-02-01 / 0.48.4
 
 - fix: Minor fix.
