@@ -9,7 +9,7 @@ http://sw.cowtech.it/dante
 
 ## Installation
 
-```
+```bash
 npx --package=@perseveranza-pets/dante -- create-dante-site my-site
 cd my-site
 npm install
