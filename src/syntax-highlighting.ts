@@ -8,6 +8,7 @@ import {
   type SpecialTheme
 } from 'shiki'
 import { elapsed } from './build.js'
+import { type CSSClassesResolver } from './css.js'
 
 let highlighter: Highlighter
 
@@ -179,4 +180,23 @@ export async function renderCode(
     .join('\n')
 
   return `<pre dante-code-root="true" class="bg-${bg} text-${fg}">${html}</pre>`
+}
+
+export function applyCodeClasses(resolveClasses: CSSClassesResolver, rendered: string): [string, string] {
+  // Resolve classes
+  rendered = rendered
+    .replaceAll(
+      / dante-code-element="true" class="([^"]+)"/g,
+      (_: string, classes: string) => ` class="${resolveClasses(classes)}"`
+    )
+    .replaceAll('$', '&#36;')
+
+  // Extract the root element classed and its contents
+  const [, rootClassName, contents] = rendered.match(/<pre dante-code-root="true" class="([^"]+)">(.+)<\/pre>/s)!
+
+  return [rootClassName, contents]
+}
+
+export function sanitizeTabularOutputSnippet(code: string): string {
+  return code.replaceAll(/[\u{2502}\u{2551}]/gu, '|\u{200C}').replaceAll(/[\u{2500}-\u{257F}]/gu, '-\u{200C}')
 }

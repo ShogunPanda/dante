@@ -63,6 +63,7 @@ export async function transformCSS(config: UserConfig, css: string): Promise<str
   return code.toString()
 }
 
+// TODO@PI: Support a sorter here to minimize impact of transformer
 export async function loadCSSClassesExpansion(css: string): Promise<ClassesExpansions> {
   // Load classes from the classes file
   const unserializedClass: InternalClassesExpansions = {}
