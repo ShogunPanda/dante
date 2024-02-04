@@ -1,3 +1,8 @@
+### 2024-02-04 / 0.50.0
+
+- feat: Added new CSS utility methods.
+- chore: Updated readme.
+
 ### 2024-02-03 / 0.49.0
 
 - feat: Added new code utility methods.
