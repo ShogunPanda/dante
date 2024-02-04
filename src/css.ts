@@ -17,6 +17,21 @@ const cssClassAlphabet = 'abcdefghijklmnopqrstuvwxyz'
 const cssClassAlphabetLength = cssClassAlphabet.length
 const cssForbiddenClasses = new Set(['ad'])
 
+export function splitRule(rule: string): [string, string, string] {
+  let [layer, ruleWithPseudo] = rule.split('@')
+
+  if (!ruleWithPseudo) {
+    ruleWithPseudo = layer
+    layer = ''
+  } else {
+    layer += '@'
+  }
+
+  const ruleTokens = ruleWithPseudo.split(':')
+
+  return [layer, ruleTokens.length === 1 ? '' : ruleTokens.slice(0, -1).join(':'), ruleTokens.at(-1)!]
+}
+
 function replaceCSSClassesPlugin(compressedClasses: Map<string, string>, decl: Rule): void {
   if (!decl.selector.startsWith('.')) {
     return
@@ -63,7 +78,6 @@ export async function transformCSS(config: UserConfig, css: string): Promise<str
   return code.toString()
 }
 
-// TODO@PI: Support a sorter here to minimize impact of transformer
 export async function loadCSSClassesExpansion(css: string): Promise<ClassesExpansions> {
   // Load classes from the classes file
   const unserializedClass: InternalClassesExpansions = {}
@@ -143,6 +157,64 @@ export async function loadCSSClassesExpansion(css: string): Promise<ClassesExpan
   }
 
   return classes
+}
+
+export function sortCssClassesExpansions(
+  context: BuildContext,
+  cssClassExpansionPriorities: RegExp[],
+  classes: ClassesExpansions
+): void {
+  for (const klass of Object.values(classes)) {
+    klass.sort((a, b) => {
+      const [aLayer, aPseudo, aRule] = splitRule(a)
+      const [bLayer, bPseudo, bRule] = splitRule(b)
+
+      // Different layers, compare
+      if (aLayer !== bLayer) {
+        // One has layer and the other don't. The priority is the one layer
+        if (!aLayer) {
+          return -1
+        } else if (!bLayer) {
+          return 1
+        }
+
+        // Sort layers alphabetically
+        return aLayer.localeCompare(bLayer)
+      }
+
+      // Different pseudo, compare
+      if (aPseudo !== bPseudo) {
+        if (!aPseudo) {
+          return -1
+        } else if (!bPseudo) {
+          return 1
+        }
+      }
+
+      const aPriority = cssClassExpansionPriorities.findIndex(matcher => matcher.test(aRule))
+      const bPriority = cssClassExpansionPriorities.findIndex(matcher => matcher.test(bRule))
+
+      if (aPriority === -1) {
+        context.logger.warn(`Cannot find CSS class expansion priority for class "${aRule}". Giving less priority ...`)
+
+        // If the other one is also undefined, do not change the order
+        return bPriority === -1 ? -1 : 1
+      }
+
+      if (bPriority === -1) {
+        context.logger.warn(`Cannot find CSS class expansion priority for class "${bRule}". Giving less priority ...`)
+
+        return -1
+      }
+
+      // When they have the same priority, do not change the order
+      if (aPriority === bPriority) {
+        return -1
+      }
+
+      return aPriority - bPriority
+    })
+  }
 }
 
 export function compressCssClass(context: BuildContext, expanded: string): string {
