@@ -1,6 +1,6 @@
 import fastifyStatic from '@fastify/static'
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
-import { BAD_REQUEST, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
+import { BAD_REQUEST, NOT_FOUND, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
 import EventEmitter from 'node:events'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile } from 'node:fs/promises'
@@ -162,7 +162,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
 
   server.setNotFoundHandler(function (_: FastifyRequest, reply: FastifyReply) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    reply.type('text/html').sendFile('404.html')
+    reply.code(NOT_FOUND).type('text/html').sendFile('404.html')
   })
 
   process.on('SIGINT', () => {
