@@ -1,3 +1,7 @@
+### 2024-02-05 / 0.50.1
+
+- fix: Fixed response code on 404.
+
 ### 2024-02-04 / 0.50.0
 
 - feat: Added new CSS utility methods.
