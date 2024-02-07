@@ -1,3 +1,8 @@
+### 2024-02-07 / 0.50.2
+
+- fix: Minor improvement.
+- chore: Updated dependencies.
+
 ### 2024-02-05 / 0.50.1
 
 - fix: Fixed response code on 404.
