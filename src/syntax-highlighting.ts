@@ -5,7 +5,8 @@ import {
   type Highlighter,
   type LanguageRegistration,
   type SpecialLanguage,
-  type SpecialTheme
+  type SpecialTheme,
+  type ThemedToken
 } from 'shiki'
 import { elapsed } from './build.js'
 import { type CSSClassesResolver } from './css.js'
@@ -106,6 +107,7 @@ export async function renderCode(
     await highlighter.loadLanguage(language as BundledLanguage)
   }
 
+  // @ts-expect-error shiki typing error
   const lines = highlighter.codeToThemedTokens(code.trim(), {
     lang: language as SpecialLanguage,
     theme: theme as SpecialTheme
@@ -117,7 +119,7 @@ export async function renderCode(
   const hasRanges = ranges.length > 0
 
   const html = lines
-    .map((tokens, i) => {
+    .map((tokens: ThemedToken[], i: number) => {
       const lineNumber = i + 1
       const lineClasses = [classes.line]
 

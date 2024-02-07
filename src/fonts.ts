@@ -56,7 +56,7 @@ export async function downloadFonts(logger: pino.Logger, urls: string[], whiteli
           }
 
           const props = Object.fromEntries(
-            decl.nodes.map(d => {
+            decl.nodes!.map(d => {
               const pair = d as Declaration
               return [pair.prop, pair.value]
             })
