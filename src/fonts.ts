@@ -120,8 +120,8 @@ export function fontsToCss(fonts: Fonts): string {
     for (const [style, definitions] of Object.entries(family)) {
       for (const [weight, ranges] of Object.entries(definitions)) {
         for (const [range, urlIndex] of Object.entries(ranges)) {
-          const url = fonts.urls[urlIndex]!
-          const unicodeRange = fonts.ranges[range]!
+          const url = fonts.urls[urlIndex]
+          const unicodeRange = fonts.ranges[range]
 
           const props = [
             ['font-family', `'${name}'`],
