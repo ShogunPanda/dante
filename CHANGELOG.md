@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.51.0
+
+- feat: Remove UnoCSS.
+
 ### 2024-02-07 / 0.50.2
 
 - fix: Minor improvement.
