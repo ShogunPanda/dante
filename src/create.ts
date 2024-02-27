@@ -30,7 +30,6 @@ const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.js
 const templates = {
   'src/build/cli.ts': 'cli.ts',
   'src/build/index.ts': 'index.ts',
-  'src/styling/unocss.config.ts': 'unocss.config.ts',
   'src/templates/index.html.tsx': 'index.tsx',
   '.eslintrc.json': 'eslintrc.json',
   '.stylelintrc.json': 'stylelintrc.json',
