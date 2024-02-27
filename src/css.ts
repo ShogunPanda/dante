@@ -1,6 +1,7 @@
 import postcss from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
 import postcssMinifySelector from 'postcss-minify-selectors'
+import postCssNested from 'postcss-nested'
 import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
 import { type BuildContext } from './models.js'
 
@@ -25,7 +26,6 @@ export async function finalizePageCSS(context: BuildContext, html: string, css: 
     return html
   }
 
-  // @ts-expect-error Wrong typing
   const rules = [postCssNested()]
 
   if (context.isProduction) {
