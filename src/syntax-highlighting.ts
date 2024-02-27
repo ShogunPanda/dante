@@ -107,8 +107,7 @@ export async function renderCode(
     await highlighter.loadLanguage(language as BundledLanguage)
   }
 
-  // @ts-expect-error shiki typing error
-  const lines = highlighter.codeToThemedTokens(code.trim(), {
+  const lines = highlighter.codeToTokensBase(code.trim(), {
     lang: language as SpecialLanguage,
     theme: theme as SpecialTheme
   })
