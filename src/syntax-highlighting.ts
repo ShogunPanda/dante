@@ -178,7 +178,7 @@ export async function renderCode(
     })
     .join('\n')
 
-  return `<pre class="${cleanCssClasses(classes.code)}" style="--dante-bg: ${bg}; --dante-fg: ${fg}">${html}</pre>`
+  return `<pre class="${cleanCssClasses(classes.root)}" style="--dante-bg: ${bg}; --dante-fg: ${fg}">${html}</pre>`
 }
 
 export function sanitizeTabularOutputSnippet(code: string): string {
