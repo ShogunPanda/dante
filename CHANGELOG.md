@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.54.1
+
+- fix: Fixed shiki typing.
+
 ### 2024-02-27 / 0.54.0
 
 - feat: Improve CSS injection.
