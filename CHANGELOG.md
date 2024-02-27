@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.55.0
+
+- feat: Also show CSS representation of the fonts.
+
 ### 2024-02-27 / 0.54.1
 
 - fix: Fixed shiki typing.
