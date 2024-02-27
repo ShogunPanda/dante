@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.55.2
+
+- fix: Fixed class name.
+
 ### 2024-02-27 / 0.55.1
 
 - feat: Added missing import.
