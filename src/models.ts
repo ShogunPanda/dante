@@ -8,27 +8,12 @@ export type Mode = 'development' | 'production'
 
 export type ValueOrCallback<T> = T | ((context: BuildContext) => T | Promise<T>)
 
-export type CssClassTransformer = (klass: string, index: number) => string
-
-export interface CSSClassGeneratorContext {
-  prefix?: string
-  name: string
-  counter: number
-}
-
 export interface BuildContext {
   version: string
   logger: pino.Logger
   isProduction: boolean
   root: string
   currentPage?: string
-  css: {
-    keepExpanded: boolean
-    transformer?: CssClassTransformer
-    currentClasses: Set<string>
-    compressedClasses: Map<string, string>
-    compressionState: number
-  }
   extensions: any
 }
 
@@ -94,12 +79,6 @@ export function createBuildContext(logger: pino.Logger, isProduction: boolean, r
     logger,
     isProduction,
     root,
-    css: {
-      keepExpanded: !isProduction,
-      currentClasses: new Set(),
-      compressedClasses: new Map<string, string>(),
-      compressionState: 0
-    },
     extensions: {}
   }
 }
