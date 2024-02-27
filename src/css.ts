@@ -20,15 +20,9 @@ export function cleanCssClasses(...klass: (CSSClassToken | CSSClassToken[])[]): 
   return tokenizeCssClasses(klass).join(' ')
 }
 
-export async function finalizePageCSS(context: BuildContext, contents: string, originalCss: string): Promise<string> {
-  // First of all, extract the classes
-  const matcher = /<style data-dante-css-classes="([^"]+)"(?:\/>|>.*<\/style>)/
-  const mo = contents.match(matcher)
-
-  if (!mo) {
-    return contents
-  } else if (originalCss) {
-    return contents.replace(matcher, '')
+export async function finalizePageCSS(context: BuildContext, html: string, css: string): Promise<string> {
+  if (!css?.trim().length || !html.includes('</head>')) {
+    return html
   }
 
   // @ts-expect-error Wrong typing
@@ -38,10 +32,10 @@ export async function finalizePageCSS(context: BuildContext, contents: string, o
     rules.push(postcssDiscardComments({ removeAll: true }), postcssNormalizeWhitespace(), postcssMinifySelector())
   }
 
-  const { css } = await postcss(rules).process(originalCss, {
+  const { css: finalCss } = await postcss(rules).process(css, {
     from: 'input.css',
     to: 'output.css'
   })
 
-  return contents.replace(matcher, `<style>${css}</style>`)
+  return html.replace('</head>', `<style>${finalCss}</style></head>`)
 }
