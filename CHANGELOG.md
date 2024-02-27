@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.52.0
+
+- feat: Remove other references to UnoCSS.
+
 ### 2024-02-27 / 0.51.0
 
 - feat: Remove UnoCSS.
