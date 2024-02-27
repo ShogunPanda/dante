@@ -95,7 +95,13 @@ export async function downloadFonts(logger: pino.Logger, urls: string[], whiteli
 
   logger.info('YAML representation of the fonts:\n')
   setTimeout(() => {
-    console.log('---\n' + dump(fonts, { lineWidth: 1000 }))
+    console.log('---\n' + dump(fonts, { lineWidth: 1000 }) + '\n')
+
+    logger.info('CSS representation of the fonts:\n')
+
+    setTimeout(() => {
+      console.log(fontsToCss(fonts))
+    }, 200)
   }, 200)
 }
 
