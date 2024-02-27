@@ -9,7 +9,7 @@ import {
   type ThemedToken
 } from 'shiki'
 import { elapsed } from './build.js'
-import { type CSSClassesResolver } from './css.js'
+import { cleanCssClasses } from './css.js'
 
 let highlighter: Highlighter
 
@@ -150,53 +150,36 @@ export async function renderCode(
 
       const children = tokens
         .map(({ content, color, fontStyle }) => {
-          const spanClasses = [`text-${color}`]
+          const spanClasses = []
 
           if (fontStyle) {
             if (fontStyle & 1) {
               // Italic
-              spanClasses.push('font-italic')
+              spanClasses.push(classes.italic)
             }
 
             if (fontStyle & 2) {
               // Bold
-              spanClasses.push('font-bold')
+              spanClasses.push(classes.bold)
             }
 
             if (fontStyle & 4) {
               // Underline
-              spanClasses.push('underline')
+              spanClasses.push(classes.underline)
             }
           }
 
-          return `<span dante-code-element="true" class="${spanClasses.join(' ')}">${content}</span>`
+          return `<span class="${cleanCssClasses(spanClasses)}" style="--dante-fg: ${color}">${content}</span>`
         })
         .join('')
 
-      const lineNumberSpan = numbers
-        ? `<span dante-code-element="true" class="${classes.lineNumber ?? ''}">${lineNumber}</span>`
-        : ''
+      const lineNumberSpan = numbers ? `<span class="${classes.lineNumber ?? ''}">${lineNumber}</span>` : ''
 
-      return `<span dante-code-element="true" class="${lineClasses.join(' ')}">${lineNumberSpan}${children}</span>`
+      return `<span class="${cleanCssClasses(lineClasses)}">${lineNumberSpan}${children}</span>`
     })
     .join('\n')
 
-  return `<pre dante-code-root="true" class="bg-${bg} text-${fg}">${html}</pre>`
-}
-
-export function applyCodeClasses(resolveClasses: CSSClassesResolver, rendered: string): [string, string] {
-  // Resolve classes
-  rendered = rendered
-    .replaceAll(
-      / dante-code-element="true" class="([^"]+)"/g,
-      (_: string, classes: string) => ` class="${resolveClasses(classes)}"`
-    )
-    .replaceAll('$', '&#36;')
-
-  // Extract the root element classed and its contents
-  const [, rootClassName, contents] = rendered.match(/<pre dante-code-root="true" class="([^"]+)">(.+)<\/pre>/s)!
-
-  return [rootClassName, contents]
+  return `<pre class="${cleanCssClasses(classes.code)}" style="--dante-bg: ${bg}; --dante-fg: ${fg}">${html}</pre>`
 }
 
 export function sanitizeTabularOutputSnippet(code: string): string {

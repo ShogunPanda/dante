@@ -102,7 +102,7 @@ export async function builder(context: BuildContext): Promise<void> {
 
     // Perform the build
     const { build }: { build: BuildFunction } = await import(buildFilePath())
-    const { css, cssConfig } = await build(context)
+    const { css } = await build(context)
 
     // Now, for each generated page, replace the @import class with the production CSS
     const pages = await glob(resolve(fullOutput, '**/*.html'))
@@ -111,9 +111,8 @@ export async function builder(context: BuildContext): Promise<void> {
       context.currentPage = page
 
       const finalCss = css ? (typeof css === 'function' ? await css(context) : css) : ''
-      const finalCssConfig = cssConfig ? (typeof cssConfig === 'function' ? await cssConfig(context) : cssConfig) : {}
 
-      let finalized = await finalizePageCSS(context, finalCssConfig, await readFile(page, 'utf8'), finalCss)
+      let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), finalCss)
 
       if (!context.isProduction) {
         finalized = finalized.replace(

@@ -33,6 +33,7 @@ const templates = {
   'src/styling/unocss.config.ts': 'unocss.config.ts',
   'src/templates/index.html.tsx': 'index.tsx',
   '.eslintrc.json': 'eslintrc.json',
+  '.stylelintrc.json': 'stylelintrc.json',
   '.swcrc': 'swcrc',
   'package.json': 'package.json',
   'prettier.config.cjs': 'prettier.config.cjs',
