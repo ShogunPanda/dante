@@ -1,3 +1,7 @@
+### 2024-02-27 / 0.55.1
+
+- feat: Added missing import.
+
 ### 2024-02-27 / 0.55.0
 
 - feat: Also show CSS representation of the fonts.
