@@ -20,7 +20,7 @@ dante dev
 
 ### Creating pages and files
 
-Simply create all file needed in the `build` function in `src/build/index.ts`. You can use any framework you want, the predefined one is React.
+Simply create all file needed in the `build` function in `src/build/index.ts`. You can use any framework you want, the predefined one when using `create-dante-site my-site` is React.
 
 We strongly recommend to use the `createFile` function exported from `dante` to create file as it will take care of replacing `$hash` in the file name with the actual file hash.
 
