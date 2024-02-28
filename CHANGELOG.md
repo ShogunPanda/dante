@@ -1,3 +1,7 @@
+### 2024-02-28 / 0.56.3
+
+- fix: Use quotes around URLs.
+
 ### 2024-02-28 / 0.56.2
 
 - fix: Use right URLs, again.
