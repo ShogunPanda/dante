@@ -126,7 +126,7 @@ export function fontsToCss(fonts: Fonts): string {
             ['font-weight', weight],
             ['font-style', style],
             ['font-display', 'swap'],
-            ['src', `url(${url}) format('woff2')`],
+            ['src', `url('${url}') format('woff2')`],
             ['unicode-range', unicodeRange]
           ]
 
