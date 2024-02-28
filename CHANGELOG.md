@@ -1,3 +1,11 @@
+### 2024-02-28 / 0.56.0
+
+- feat: Include font URL in generated CSS.
+- fix: Fixed README.md.
+- chore: Removed references to react in dante.
+- chore: Removed references to react in dante.
+- chore: Removed unused dependency.
+
 ### 2024-02-27 / 0.55.2
 
 - fix: Fixed class name.
