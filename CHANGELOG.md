@@ -1,3 +1,7 @@
+### 2024-02-28 / 0.56.2
+
+- fix: Use right URLs, again.
+
 ### 2024-02-28 / 0.56.1
 
 - fix: Use right URLs.
