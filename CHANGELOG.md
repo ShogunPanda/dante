@@ -1,3 +1,7 @@
+### 2024-02-28 / 0.56.1
+
+- fix: Use right URLs.
+
 ### 2024-02-28 / 0.56.0
 
 - feat: Include font URL in generated CSS.
