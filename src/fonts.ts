@@ -112,11 +112,9 @@ export async function loadFontsFile(path: string): Promise<Fonts> {
 export function fontsToCss(fonts: Fonts): string {
   let css = ''
 
-  const families = Object.entries(fonts.families)
-  for (let i = 0; i < families.length; i++) {
-    const [name, family] = families[i]
+  for (const [name, family] of Object.entries(fonts.families)) {
+    css += `/* ${fonts.sources[name]} */\n\n`
 
-    css += `/* ${fonts.sources[i]} */\n\n`
     for (const [style, definitions] of Object.entries(family)) {
       for (const [weight, ranges] of Object.entries(definitions)) {
         for (const [range, urlIndex] of Object.entries(ranges)) {
