@@ -1,4 +1,4 @@
-import postcss from 'postcss'
+import postcss, { type Plugin } from 'postcss'
 import postcssDiscardComments from 'postcss-discard-comments'
 import postcssMinifySelector from 'postcss-minify-selectors'
 import postCssNested from 'postcss-nested'
@@ -21,12 +21,17 @@ export function cleanCssClasses(...klass: (CSSClassToken | CSSClassToken[])[]): 
   return tokenizeCssClasses(klass).join(' ')
 }
 
-export async function finalizePageCSS(context: BuildContext, html: string, css: string): Promise<string> {
+export async function finalizePageCSS(
+  context: BuildContext,
+  html: string,
+  css: string,
+  postCssPlugins?: Plugin[]
+): Promise<string> {
   if (!css?.trim().length || !html.includes('</head>')) {
     return html
   }
 
-  const rules = [postCssNested()]
+  const rules = [postCssNested(), ...(postCssPlugins ?? [])]
 
   if (context.isProduction) {
     rules.push(postcssDiscardComments({ removeAll: true }), postcssNormalizeWhitespace(), postcssMinifySelector())
