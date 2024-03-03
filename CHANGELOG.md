@@ -1,3 +1,7 @@
+### 2024-03-03 / 0.57.0
+
+- feat: Support custom CSS PostCSS plugins.
+
 ### 2024-02-28 / 0.56.3
 
 - fix: Use quotes around URLs.
