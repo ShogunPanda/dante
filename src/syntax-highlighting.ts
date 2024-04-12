@@ -62,7 +62,7 @@ export async function initializeSyntaxHighlighting(logger?: pino.Logger): Promis
   logger?.info('Preparing syntax highlighting ...')
   const operationStart = process.hrtime.bigint()
 
-  highlighter = await getHighlighter({ themes: preloadedThemes })
+  highlighter = await getHighlighter({ themes: preloadedThemes, langs: [] })
   await highlighter.loadLanguage(outputLanguage)
   await highlighter.loadLanguage(noneLanguage)
 
