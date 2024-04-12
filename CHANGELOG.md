@@ -1,3 +1,7 @@
+### 2024-04-12 / 0.57.1
+
+- chore: Updated dependencies.
+
 ### 2024-03-03 / 0.57.0
 
 - feat: Support custom CSS PostCSS plugins.
