@@ -1,3 +1,8 @@
+### 2024-10-28 / 0.58.0
+
+- feat!: Dropped support for Node 18 and updated dependencies.
+- chore: Renamed template file.
+
 ### 2024-04-12 / 0.57.1
 
 - chore: Updated dependencies.
