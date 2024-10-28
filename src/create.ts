@@ -31,7 +31,7 @@ const templates = {
   'src/build/cli.ts': 'cli.ts',
   'src/build/index.ts': 'index.ts',
   'src/templates/index.html.tsx': 'index.tsx',
-  '.eslintrc.json': 'eslintrc.json',
+  'eslint.config.js': 'eslint.config.js',
   '.stylelintrc.json': 'stylelintrc.json',
   '.swcrc': 'swcrc',
   'package.json': 'package.json',

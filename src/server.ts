@@ -92,7 +92,6 @@ export function notifyBuildStatus(status: 'pending' | 'success' | 'failed', payl
 }
 
 function syncHandler(_: FastifyRequest, reply: FastifyReply): void {
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   reply
     .header('content-type', 'text/event-stream')
     .header('cache-control', 'no-cache')
@@ -161,12 +160,10 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   }
 
   server.setNotFoundHandler(function (_: FastifyRequest, reply: FastifyReply) {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     reply.code(NOT_FOUND).type('text/html').sendFile('404.html')
   })
 
   process.on('SIGINT', () => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     server.close()
   })
 

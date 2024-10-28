@@ -23,28 +23,29 @@
     "postbuild": "concurrently npm:lint npm:lint:css npm:typecheck",
     "serve": "dante server",
     "format": "prettier -w src",
-    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src",
+    "lint": "eslint --cache",
     "lint:css": "stylelint --cache src",
     "typecheck": "tsc -p . --emitDeclarationOnly"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@cowtech/eslint-config": "^9.0.3",
-    "@cowtech/stylelint-config": "^0.1.1",
-    "@swc/core": "^1.4.2",
-    "@types/node": "^20.11.20",
-    "@types/react": "^18.2.60",
-    "@types/react-dom": "^18.2.19",
-    "commander": "^12.0.0",
-    "concurrently": "^8.2.2",
-    "dante": "^@VERSION@",
-    "pino": "^8.19.0",
-    "prettier": "^3.2.5"
+    "@cowtech/eslint-config": "^10.0.0",
+    "@cowtech/stylelint-config": "^1.0.0",
+    "@swc/core": "^1.7.36",
+    "@types/node": "^22.7.7",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "commander": "^12.1.0",
+    "concurrently": "^9.0.1",
+    "dante": "@VERSION@",
+    "eslint": "^9.13.0",
+    "pino": "^9.5.0",
+    "prettier": "^3.3.3"
   },
   "engines": {
-    "node": ">= 18.18.0"
+    "node": ">= 20.18.0"
   }
 }

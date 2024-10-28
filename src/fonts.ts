@@ -82,9 +82,8 @@ export async function downloadFonts(logger: pino.Logger, urls: string[], whiteli
 
           fonts.sources[family] = remoteUrl
 
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           fonts.families[family] ??= {} as FontFamily
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+
           fonts.families[family][style as Style] ??= {} as Font
           fonts.families[family][style as Style][parseInt(weight, 10)] ??= {}
           fonts.families[family][style as Style][parseInt(weight, 10)][range] = urlIndex

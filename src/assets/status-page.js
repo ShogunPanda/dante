@@ -1,3 +1,5 @@
+/* globals EventSource, location */
+
 {
   const pendingMessage = document.querySelector('#pending')
   const errorContainer = document.querySelector('#error')

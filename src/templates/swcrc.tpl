@@ -1,9 +1,9 @@
 {
   "env": {
-    "targets": "node >= 16"
+    "targets": "node >= 20"
   },
   "jsc": {
-    "target": "es2022",
+    "target": "esnext",
     "parser": {
       "syntax": "typescript",
       "tsx": true,
