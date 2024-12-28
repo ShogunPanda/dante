@@ -1,3 +1,7 @@
+### 2024-12-28 / 0.58.1
+
+- chore: Updated dependencies.
+
 ### 2024-10-28 / 0.58.0
 
 - feat!: Dropped support for Node 18 and updated dependencies.
