@@ -1,4 +1,3 @@
-import { minify, type Output } from '@swc/core'
 import { glob } from 'glob'
 import { spawn } from 'node:child_process'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
@@ -77,8 +76,8 @@ async function generateHotReloadPage(): Promise<string> {
   const page = await readFile(fileURLToPath(new URL('assets/status-page.html', import.meta.url)), 'utf8')
   const client = await readFile(fileURLToPath(new URL('assets/status-page.js', import.meta.url)), 'utf8')
 
-  const minifiedClient = await minify(client, { compress: true, mangle: false })
-  return page.replace('</body>', `<script type="text/javascript">${minifiedClient.code}</script></body>`)
+  // const minifiedClient = await minify(client, { compress: true, mangle: false })
+  return page.replace('</body>', `<script type="text/javascript">${client}</script></body>`)
 }
 
 export async function builder(context: BuildContext): Promise<void> {
@@ -91,12 +90,10 @@ export async function builder(context: BuildContext): Promise<void> {
     await mkdir(fullOutput, { recursive: true })
 
     // Prepare for HMR
-    let hotReloadClient: Output
+    let hotReloadClient: string = ''
 
     if (!context.isProduction) {
-      hotReloadClient = await minify(
-        await readFile(fileURLToPath(new URL('assets/hot-reload.js', import.meta.url)), 'utf8')
-      )
+      hotReloadClient = await readFile(fileURLToPath(new URL('assets/hot-reload.js', import.meta.url)), 'utf8')
       await writeFile(resolve(rootDir, baseTemporaryDirectory, '__status.html'), await generateHotReloadPage(), 'utf8')
     }
 
@@ -120,10 +117,7 @@ export async function builder(context: BuildContext): Promise<void> {
       let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), finalCss, finalPostcssPlugins)
 
       if (!context.isProduction) {
-        finalized = finalized.replace(
-          '</body>',
-          `<script type="text/javascript">${hotReloadClient!.code}</script></body>`
-        )
+        finalized = finalized.replace('</body>', `<script type="text/javascript">${hotReloadClient}</script></body>`)
       }
 
       await writeFile(page, finalized, 'utf8')
