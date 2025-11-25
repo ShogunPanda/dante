@@ -1,6 +1,6 @@
-import { type pino } from 'pino'
+import { type Logger } from 'pino'
 import {
-  getHighlighter,
+  createHighlighter,
   type BundledLanguage,
   type Highlighter,
   type LanguageRegistration,
@@ -8,8 +8,8 @@ import {
   type SpecialTheme,
   type ThemedToken
 } from 'shiki'
-import { elapsed } from './build.js'
-import { cleanCssClasses } from './css.js'
+import { elapsed } from './build.ts'
+import { cleanCssClasses } from './css.ts'
 
 let highlighter: Highlighter
 
@@ -58,11 +58,11 @@ const noneLanguage: LanguageRegistration = {
   }
 }
 
-export async function initializeSyntaxHighlighting(logger?: pino.Logger): Promise<void> {
+export async function initializeSyntaxHighlighting(logger?: Logger): Promise<void> {
   logger?.info('Preparing syntax highlighting ...')
   const operationStart = process.hrtime.bigint()
 
-  highlighter = await getHighlighter({ themes: preloadedThemes, langs: [] })
+  highlighter = await createHighlighter({ themes: preloadedThemes, langs: [] })
   await highlighter.loadLanguage(outputLanguage)
   await highlighter.loadLanguage(noneLanguage)
 

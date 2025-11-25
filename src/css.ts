@@ -3,7 +3,7 @@ import postcssDiscardComments from 'postcss-discard-comments'
 import postcssMinifySelector from 'postcss-minify-selectors'
 import postCssNested from 'postcss-nested'
 import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
-import { type BuildContext } from './models.js'
+import { type BuildContext } from './models.ts'
 
 export type CSSClassToken = string | false | undefined | null
 

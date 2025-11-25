@@ -3,17 +3,17 @@ import { existsSync, readFileSync } from 'node:fs'
 import { type AddressInfo } from 'node:net'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { pino } from 'pino'
-import { builder, compileSourceCode } from './build.js'
-import { downloadFonts } from './fonts.js'
-import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.js'
-import { localServer } from './server.js'
-import { initializeSyntaxHighlighting } from './syntax-highlighting.js'
+import { pino, type Logger } from 'pino'
+import { builder, compileSourceCode } from './build.ts'
+import { downloadFonts } from './fonts.ts'
+import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.ts'
+import { localServer } from './server.ts'
+import { initializeSyntaxHighlighting } from './syntax-highlighting.ts'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
 
-let siteSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null = null
+let siteSetupCLI: ((program: Command, logger: Logger) => void) | null = null
 
 if (process.env.DANTE_CLI_PATH) {
   const imported = await import(resolve(rootDir, process.env.DANTE_CLI_PATH))

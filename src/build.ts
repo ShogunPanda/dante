@@ -5,7 +5,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
-import { finalizePageCSS } from './css.js'
+import { finalizePageCSS } from './css.ts'
 import {
   baseTemporaryDirectory,
   buildFilePath,
@@ -14,8 +14,8 @@ import {
   rootDir,
   type BuildContext,
   type BuildFunction
-} from './models.js'
-import { notifyBuildStatus } from './server.js'
+} from './models.ts'
+import { notifyBuildStatus } from './server.ts'
 
 export function elapsed(start: bigint): string {
   return (Number(process.hrtime.bigint() - start) / 1e6).toFixed(3)

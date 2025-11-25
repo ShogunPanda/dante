@@ -1,6 +1,6 @@
 {
   "env": {
-    "targets": "node >= 20"
+    "targets": "node >= 22"
   },
   "jsc": {
     "target": "esnext",

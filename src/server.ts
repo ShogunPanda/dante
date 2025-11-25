@@ -7,7 +7,7 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
-import { baseTemporaryDirectory, rootDir, serverFilePath, type ServerFunction } from './models.js'
+import { baseTemporaryDirectory, rootDir, serverFilePath, type ServerFunction } from './models.ts'
 
 declare module 'fastify' {
   interface FastifyInstance {

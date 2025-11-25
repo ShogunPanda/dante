@@ -5,13 +5,13 @@ import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { pino } from 'pino'
-import { compileSourceCode } from './build.js'
-import { baseTemporaryDirectory, rootDir } from './models.js'
+import { pino, type Logger } from 'pino'
+import { compileSourceCode } from './build.ts'
+import { baseTemporaryDirectory, rootDir } from './models.ts'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 
-let createSetupCLI: ((program: Command, logger: pino.BaseLogger) => void) | null = null
+let createSetupCLI: ((program: Command, logger: Logger) => void) | null = null
 
 if (process.env.DANTE_CREATE_PATH) {
   const imported = await import(resolve(rootDir, process.env.DANTE_CREATE_PATH))
@@ -45,7 +45,7 @@ function compile(template: string, variables: Record<string, string>): string {
   })
 }
 
-export async function initializeSite(logger: pino.Logger, name: string, directory: string): Promise<void> {
+export async function initializeSite(logger: Logger, name: string, directory: string): Promise<void> {
   const packageJson = JSON.parse(await readFile(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
   const fullOutput = resolve(rootDir, directory)
 
