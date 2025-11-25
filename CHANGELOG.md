@@ -1,3 +1,8 @@
+### 2025-11-25 / 0.60.0
+
+- chore: Removed @swc/core.
+- fix: fixup
+
 ### 2025-11-25 / 0.59.0
 
 - feat!: Drop compatibility with Node.js 20.
