@@ -6,8 +6,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { pino, type Logger } from 'pino'
-import { compileSourceCode } from './build.ts'
-import { baseTemporaryDirectory, rootDir } from './models.ts'
+import { rootDir } from './models.ts'
 
 const logger = pino({ transport: { target: 'pino-pretty' } })
 
@@ -17,8 +16,7 @@ if (process.env.DANTE_CREATE_PATH) {
   const imported = await import(resolve(rootDir, process.env.DANTE_CREATE_PATH))
   createSetupCLI = imported.createSetupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/create.ts'))) {
-  await compileSourceCode()
-  const imported = await import(resolve(rootDir, baseTemporaryDirectory, 'build/create.js'))
+  const imported = await import(resolve(rootDir, './src/build/create.ts'))
   createSetupCLI = imported.createSetupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/create.js'))) {
   const imported = await import(resolve(rootDir, './src/build/create.js'))
@@ -33,7 +31,6 @@ const templates = {
   'src/templates/index.html.tsx': 'index.tsx',
   'eslint.config.js': 'eslint.config.js',
   '.stylelintrc.json': 'stylelintrc.json',
-  '.swcrc': 'swcrc',
   'package.json': 'package.json',
   'prettier.config.js': 'prettier.config.js',
   'tsconfig.json': 'tsconfig.json'

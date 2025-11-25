@@ -4,9 +4,9 @@ import { type AddressInfo } from 'node:net'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { pino, type Logger } from 'pino'
-import { builder, compileSourceCode } from './build.ts'
+import { builder } from './build.ts'
 import { downloadFonts } from './fonts.ts'
-import { baseTemporaryDirectory, createBuildContext, programDescription, programName, rootDir } from './models.ts'
+import { createBuildContext, programDescription, programName, rootDir } from './models.ts'
 import { localServer } from './server.ts'
 import { initializeSyntaxHighlighting } from './syntax-highlighting.ts'
 
@@ -19,8 +19,7 @@ if (process.env.DANTE_CLI_PATH) {
   const imported = await import(resolve(rootDir, process.env.DANTE_CLI_PATH))
   siteSetupCLI = imported.setupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/cli.ts'))) {
-  await compileSourceCode()
-  const imported = await import(resolve(rootDir, baseTemporaryDirectory, 'build/cli.js'))
+  const imported = await import(resolve(rootDir, './src/build/cli.ts'))
   siteSetupCLI = imported.setupCLI ?? null
 } else if (existsSync(resolve(rootDir, './src/build/cli.js'))) {
   const imported = await import(resolve(rootDir, './src/build/cli.js'))
@@ -53,7 +52,6 @@ program
       const absoluteStaticDir = resolve(rootDir, staticDir as string)
       const buildContext = createBuildContext(logger, false, absoluteStaticDir)
 
-      await compileSourceCode(logger)
       await initializeSyntaxHighlighting(logger)
       const server = await localServer({ ip, port, logger: false, isProduction: false, staticDir: absoluteStaticDir })
       const protocol = existsSync(resolve(rootDir, 'ssl')) ? 'https' : 'http'
@@ -78,7 +76,6 @@ program
       const absoluteStaticDir = resolve(rootDir, staticDir as string)
       const buildContext = createBuildContext(logger, true, absoluteStaticDir)
 
-      await compileSourceCode(logger)
       await initializeSyntaxHighlighting(logger)
       await builder(buildContext)
     } catch (error) {

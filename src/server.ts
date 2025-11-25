@@ -7,7 +7,7 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
 import type pino from 'pino'
-import { baseTemporaryDirectory, rootDir, serverFilePath, type ServerFunction } from './models.ts'
+import { rootDir, serverFilePath, type ServerFunction } from './models.ts'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -140,9 +140,13 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   server.decorate('rootDir', root)
 
   if (!isProduction) {
+    let page = await readFile(new URL('assets/status-page.html', import.meta.url), 'utf8')
+    const client = await readFile(new URL('assets/status-page.js', import.meta.url), 'utf8')
+    page = page.replace('</body>', `<script type="text/javascript">${client}</script></body>`)
+
     server.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       if (buildStatus.status !== 'success' && request.url !== '/__status') {
-        return reply.sendFile('__status.html', resolve(rootDir, baseTemporaryDirectory))
+        return reply.type('text/html').send(page)
       }
     })
 

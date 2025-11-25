@@ -1,5 +1,5 @@
-import { readFile } from 'fs/promises'
 import { dump, load } from 'js-yaml'
+import { readFile } from 'node:fs/promises'
 import type pino from 'pino'
 import postcss, { type AtRule, type Comment, type Declaration } from 'postcss'
 

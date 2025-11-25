@@ -1,5 +1,5 @@
 import { type FastifyInstance } from 'fastify'
-import { glob } from 'glob'
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
@@ -38,38 +38,25 @@ export const danteDir = resolve(fileURLToPath(import.meta.url), '../..')
 export const rootDir = process.cwd()
 export const programName = process.env.DANTE_PROGRAM_NAME ?? 'dante'
 export const programDescription = process.env.DANTE_PROGRAM_DESCRIPTION ?? 'Opinionated static site generator.'
-export const baseTemporaryDirectory = process.env.DANTE_BASE_TEMPORARY_DIRECTORY ?? '.dante'
-
-let swc: string
-
-export async function resolveSwc(): Promise<string> {
-  const location = await glob(resolve(rootDir, 'node_modules/**/@swc/cli/bin/swc.js'), {
-    follow: true,
-    dot: true
-  })
-
-  if (!location.length) {
-    throw new Error('Cannot find swc.')
-  }
-
-  swc = location[0]
-  return swc
-}
 
 export function buildFilePath(): string {
   if (process.env.DANTE_BUILD_FILE_PATH) {
     return resolve(rootDir, process.env.DANTE_BUILD_FILE_PATH)
+  } else if (existsSync(resolve(rootDir, 'src/build/index.ts'))) {
+    return resolve(rootDir, 'src/build/index.ts')
   }
 
-  return resolve(rootDir, baseTemporaryDirectory, 'build/index.js')
+  return resolve(rootDir, 'src/build/index.js')
 }
 
 export function serverFilePath(): string {
   if (process.env.DANTE_SERVER_FILE_PATH) {
     return resolve(rootDir, process.env.DANTE_SERVER_FILE_PATH)
+  } else if (existsSync(resolve(rootDir, 'src/build/server.ts'))) {
+    return resolve(rootDir, 'src/build/server.ts')
   }
 
-  return resolve(rootDir, baseTemporaryDirectory, 'build/server.js')
+  return resolve(rootDir, 'src/build/server.js')
 }
 
 export function createBuildContext(logger: pino.Logger, isProduction: boolean, root: string): BuildContext {

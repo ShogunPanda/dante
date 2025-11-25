@@ -35,7 +35,6 @@
     "@cowtech/eslint-config": "^11.0.0",
     "@cowtech/stylelint-config": "^2.0.1",
     "@cowtech/typescript-config": "^0.2.2",
-    "@swc/core": "^1.7.36",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

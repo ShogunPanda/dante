@@ -9,19 +9,21 @@ export function hash(contents: Buffer | string): string {
 export async function createFile(
   baseDir: string,
   relativePath: string,
-  contents: string | Buffer | (() => string | Buffer | Promise<string | Buffer>),
+  contents: string | Buffer | Promise<string | Buffer> | (() => string | Buffer | Promise<string | Buffer>),
   encoding?: BufferEncoding
 ): Promise<string> {
   if (typeof contents === 'function') {
     contents = await contents()
+  } else if (typeof (contents as Promise<string>).then === 'function') {
+    contents = await contents
   }
 
   let computedHash = null
   if (relativePath.includes('$hash')) {
-    computedHash = hash(contents)
+    computedHash = hash(contents as string)
     relativePath = relativePath.replace('$hash', computedHash)
   }
 
-  await writeFile(resolve(baseDir, relativePath), contents, encoding)
+  await writeFile(resolve(baseDir, relativePath), contents as string, encoding)
   return '/' + relativePath
 }

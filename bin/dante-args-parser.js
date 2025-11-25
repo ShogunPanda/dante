@@ -1,3 +1,5 @@
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 
 const cli = parseArgs({
@@ -6,11 +8,12 @@ const cli = parseArgs({
   strict: false
 })
 
-if (['development', 'dev', 'd'].includes(cli.positionals[0])) {
-  let additionalOptions = `--no-warnings ${process.env.DANTE_NODE_ADDITIONAL_OPTIONS ?? ''}`
+let additionalOptions = `${process.env.DANTE_NODE_ADDITIONAL_OPTIONS ?? ''}`
+additionalOptions += ` --import ${pathToFileURL(resolve(import.meta.dirname, '../dist/tsx-transformer.js'))}`
 
+if (['development', 'dev', 'd'].includes(cli.positionals[0])) {
   if (process.env.DANTE_WATCH_MODULES) {
-    additionalOptions += ' --watch-path node_modules/dante'
+    additionalOptions += ' --watch-path node_modules/@perseveranza-pets/dante'
   }
 
   if (process.env.DANTE_WATCH_ADDITIONAL_PATHS) {
@@ -22,6 +25,6 @@ if (['development', 'dev', 'd'].includes(cli.positionals[0])) {
   }
 
   additionalOptions += ' --watch-path src --watch-preserve-output'
-
-  console.log(additionalOptions.replaceAll(/\s{2,}/g, ' ').trim())
 }
+
+console.log(additionalOptions.replaceAll(/\s{2,}/g, ' ').trim())
