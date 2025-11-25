@@ -1,3 +1,7 @@
+### 2025-11-25 / 0.61.0
+
+- feat: Simplify Typescript and TSX management.
+
 ### 2025-11-25 / 0.60.1
 
 - fix: Added missing assets.
