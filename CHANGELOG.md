@@ -1,3 +1,7 @@
+### 2025-11-25 / 0.60.1
+
+- fix: Added missing assets.
+
 ### 2025-11-25 / 0.60.0
 
 - chore: Removed @swc/core.
