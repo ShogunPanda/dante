@@ -1,4 +1,3 @@
-import { type Logger } from 'pino'
 import {
   createHighlighter,
   type BundledLanguage,
@@ -8,7 +7,6 @@ import {
   type SpecialTheme,
   type ThemedToken
 } from 'shiki'
-import { elapsed } from './build.ts'
 import { cleanCssClasses } from './css.ts'
 
 let highlighter: Highlighter
@@ -58,17 +56,6 @@ const noneLanguage: LanguageRegistration = {
   }
 }
 
-export async function initializeSyntaxHighlighting(logger?: Logger): Promise<void> {
-  logger?.info('Preparing syntax highlighting ...')
-  const operationStart = process.hrtime.bigint()
-
-  highlighter = await createHighlighter({ themes: preloadedThemes, langs: [] })
-  await highlighter.loadLanguage(outputLanguage)
-  await highlighter.loadLanguage(noneLanguage)
-
-  logger?.info(`Syntax highlighting prepared in ${elapsed(operationStart)} ms.`)
-}
-
 export function parseRanges(highlight: any): number[][] {
   return (highlight ?? '')
     .split(',')
@@ -99,6 +86,12 @@ export async function renderCode(
   classes: Record<string, string>,
   theme: string = 'one-dark-pro'
 ): Promise<string> {
+  if (!highlighter) {
+    highlighter = await createHighlighter({ themes: preloadedThemes, langs: [] })
+    await highlighter.loadLanguage(outputLanguage)
+    await highlighter.loadLanguage(noneLanguage)
+  }
+
   if (!language) {
     language = 'javascript'
   }

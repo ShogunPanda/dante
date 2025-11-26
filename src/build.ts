@@ -42,7 +42,7 @@ export async function builder(context: BuildContext): Promise<void> {
 
     // Perform the build
     const { build }: { build: BuildFunction } = await import(buildFilePath())
-    const { css, postcssPlugins } = await build(context)
+    const { css, cssVisitor } = await build(context)
 
     // Now, for each generated page, replace the @import class with the production CSS
     const pages = await glob(resolve(fullOutput, '**/*.html'))
@@ -51,13 +51,13 @@ export async function builder(context: BuildContext): Promise<void> {
       context.currentPage = page
 
       const finalCss = css ? (typeof css === 'function' ? await css(context) : css) : ''
-      const finalPostcssPlugins = postcssPlugins
-        ? typeof postcssPlugins === 'function'
-          ? await postcssPlugins(context)
-          : postcssPlugins
-        : []
+      const finalCssVisitor = cssVisitor
+        ? typeof cssVisitor === 'function'
+          ? await cssVisitor(context)
+          : cssVisitor
+        : undefined
 
-      let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), finalCss, finalPostcssPlugins)
+      let finalized = await finalizePageCSS(context, await readFile(page, 'utf8'), finalCss, finalCssVisitor)
 
       if (!context.isProduction) {
         const hotReloadClient = await readFile(new URL('assets/hot-reload.js', import.meta.url), 'utf8')

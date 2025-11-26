@@ -1,6 +1,5 @@
 /* globals EventSource, location */
 
-// TODO@PI: Replace with a WebSocket
 function startSyncing() {
   let lastStatus = null
   let open = false

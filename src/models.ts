@@ -1,9 +1,9 @@
 import { type FastifyInstance } from 'fastify'
+import type { Visitor } from 'lightningcss'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type pino from 'pino'
-import { type Plugin } from 'postcss'
 
 export type Mode = 'development' | 'production'
 
@@ -20,7 +20,7 @@ export interface BuildContext {
 
 export interface BuildResult {
   css?: ValueOrCallback<string>
-  postcssPlugins?: ValueOrCallback<Plugin[]>
+  cssVisitor?: ValueOrCallback<Visitor<any>>
 }
 
 export type BuildFunction = (context: BuildContext) => BuildResult | Promise<BuildResult>

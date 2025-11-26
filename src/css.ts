@@ -1,8 +1,4 @@
-import postcss, { type Plugin } from 'postcss'
-import postcssDiscardComments from 'postcss-discard-comments'
-import postcssMinifySelector from 'postcss-minify-selectors'
-import postCssNested from 'postcss-nested'
-import postcssNormalizeWhitespace from 'postcss-normalize-whitespace'
+import { transform, type Visitor } from 'lightningcss'
 import { type BuildContext } from './models.ts'
 
 export type CSSClassToken = string | false | undefined | null
@@ -21,26 +17,23 @@ export function cleanCssClasses(...klass: (CSSClassToken | CSSClassToken[])[]): 
   return tokenizeCssClasses(klass).join(' ')
 }
 
-export async function finalizePageCSS(
-  context: BuildContext,
-  html: string,
-  css: string,
-  postCssPlugins?: Plugin[]
-): Promise<string> {
+export function finalizePageCSS(context: BuildContext, html: string, css: string, visitor?: Visitor<any>): string {
   if (!css?.trim().length || !html.includes('</head>')) {
     return html
   }
 
-  const rules = [postCssNested(), ...(postCssPlugins ?? [])]
-
-  if (context.isProduction) {
-    rules.push(postcssDiscardComments({ removeAll: true }), postcssNormalizeWhitespace(), postcssMinifySelector())
-  }
-
-  const { css: finalCss } = await postcss(rules).process(css, {
-    from: 'input.css',
-    to: 'output.css'
+  const { code: finalCss } = transform({
+    filename: 'style.css',
+    code: Buffer.from(css),
+    minify: context.isProduction,
+    sourceMap: false,
+    customAtRules: {
+      color: {
+        prelude: '<custom-ident>+'
+      }
+    },
+    visitor
   })
 
-  return html.replace('</head>', `<style>${finalCss}</style></head>`)
+  return html.replace('</head>', `<style>${finalCss.toString()}</style></head>`)
 }

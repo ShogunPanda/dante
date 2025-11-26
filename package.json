@@ -49,15 +49,10 @@
     "fastify-http-errors-enhanced": "^7.0.0",
     "glob": "^13.0.0",
     "js-yaml": "^4.1.1",
+    "lightningcss": "^1.30.2",
     "oxc-transform": "^0.99.0",
     "pino-pretty": "^13.1.2",
     "postcss": "^8.5.6",
-    "postcss-discard-comments": "^7.0.5",
-    "postcss-import": "^16.1.1",
-    "postcss-minify-selectors": "^7.0.5",
-    "postcss-nested": "^7.0.2",
-    "postcss-normalize-whitespace": "^7.0.1",
-    "purgecss": "^7.0.2",
     "shiki": "3.15.0"
   },
   "devDependencies": {
@@ -65,7 +60,6 @@
     "@cowtech/typescript-config": "^0.2.2",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.10.1",
-    "@types/postcss-import": "^14.0.3",
     "eslint": "^9.39.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
