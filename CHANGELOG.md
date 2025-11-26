@@ -1,3 +1,7 @@
+### 2025-11-26 / 0.62.0
+
+- feat: Switched to lightningcss.
+
 ### 2025-11-25 / 0.61.0
 
 - feat: Simplify Typescript and TSX management.
