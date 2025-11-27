@@ -1,7 +1,8 @@
-import { dump, load } from 'js-yaml'
-import { readFile } from 'node:fs/promises'
 import type pino from 'pino'
-import postcss, { type AtRule, type Comment, type Declaration } from 'postcss'
+import type { AtRule, Comment, Declaration } from 'postcss'
+import { readFile } from 'node:fs/promises'
+import { dump, load } from 'js-yaml'
+import postcss from 'postcss'
 
 export type Style = 'normal' | 'italic' | 'bold'
 export type Weight = number

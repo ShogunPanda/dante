@@ -1,5 +1,6 @@
-import { transform, type Visitor } from 'lightningcss'
-import { type BuildContext } from './models.ts'
+import type { Visitor } from 'lightningcss'
+import type { BuildContext } from './models.ts'
+import { transform } from 'lightningcss'
 
 export type CSSClassToken = string | false | undefined | null
 

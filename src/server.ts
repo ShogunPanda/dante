@@ -1,12 +1,13 @@
-import fastifyStatic from '@fastify/static'
-import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
-import { BAD_REQUEST, NOT_FOUND, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type pino from 'pino'
 import EventEmitter from 'node:events'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
-import type pino from 'pino'
+import fastifyStatic from '@fastify/static'
+import fastify from 'fastify'
+import { BAD_REQUEST, NOT_FOUND, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
 import { rootDir, serverFilePath, type ServerFunction } from './models.ts'
 
 declare module 'fastify' {

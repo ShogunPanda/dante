@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { program, type Command } from 'commander'
 import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { program, type Command } from 'commander'
 import { pino, type Logger } from 'pino'
 import { rootDir } from './models.ts'
 

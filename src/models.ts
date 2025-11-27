@@ -1,9 +1,9 @@
-import { type FastifyInstance } from 'fastify'
+import type { FastifyInstance } from 'fastify'
 import type { Visitor } from 'lightningcss'
+import type pino from 'pino'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type pino from 'pino'
 
 export type Mode = 'development' | 'production'
 

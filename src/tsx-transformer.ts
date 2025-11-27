@@ -6,8 +6,8 @@ import {
   type ResolveFnOutput,
   type ResolveHookContext
 } from 'node:module'
-import { transformSync } from 'oxc-transform'
 import { fileURLToPath } from 'url'
+import { transformSync } from 'oxc-transform'
 
 const tsxCache: Record<string, string> = {}
 
