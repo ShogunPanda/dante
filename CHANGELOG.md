@@ -1,3 +1,7 @@
+### 2025-12-01 / 0.62.2
+
+- fix: Remove duplicated classes when cleaning.
+
 ### 2025-11-27 / 0.62.1
 
 - fix: Correctly sort type only imports.
