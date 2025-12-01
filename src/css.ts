@@ -15,7 +15,7 @@ export function tokenizeCssClasses(klass: (CSSClassToken | CSSClassToken[])[]): 
 }
 
 export function cleanCssClasses(...klass: (CSSClassToken | CSSClassToken[])[]): string {
-  return tokenizeCssClasses(klass).join(' ')
+  return Array.from(new Set(tokenizeCssClasses(klass))).join(' ')
 }
 
 export function finalizePageCSS(context: BuildContext, html: string, css: string, visitor?: Visitor<any>): string {
