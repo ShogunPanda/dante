@@ -48,9 +48,11 @@
     "fastify": "^5.6.2",
     "fastify-http-errors-enhanced": "^7.0.1",
     "glob": "^13.0.0",
+    "http-errors-enhanced": "^4.0.2",
     "js-yaml": "^4.1.1",
     "lightningcss": "^1.30.2",
     "oxc-transform": "^0.99.0",
+    "pino": "^10.3.1",
     "pino-pretty": "^13.1.2",
     "postcss": "^8.5.6",
     "shiki": "3.15.0"
