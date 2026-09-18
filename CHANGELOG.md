@@ -1,3 +1,7 @@
+### 2026-09-18 / 0.62.3
+
+- fix: Added missing dependency.
+
 ### 2025-12-01 / 0.62.2
 
 - fix: Remove duplicated classes when cleaning.
@@ -503,4 +507,3 @@
 ### 2022-12-28 / 0.2.1
 
 - fix: Bugfix.
-
