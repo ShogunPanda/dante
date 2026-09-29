@@ -54,6 +54,7 @@ The function will received a [commander](https://npm.im/commander) program and a
 
 ### Environments variables
 
+- `DANTE_BUILD_VERSION`: Override the timestamp-based site version for reproducible builds, including Freya exports.
 - `DANTE_BUILD_FILE_PATH`: The build file path. Default is `src/build/index.ts`.
 - `DANTE_SERVER_FILE_PATH`: The server file path. Default is `src/build/server.ts`.
 - `DANTE_CLI_PATH`: The CLI customization file path. Default is `src/build/cli.ts`.

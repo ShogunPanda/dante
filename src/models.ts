@@ -61,10 +61,12 @@ export function serverFilePath(): string {
 
 export function createBuildContext(logger: pino.Logger, isProduction: boolean, root: string): BuildContext {
   return {
-    version: new Date()
-      .toISOString()
-      .replaceAll(/([:-])|(\.\d+Z$)/g, '')
-      .replace('T', '.'),
+    version:
+      process.env.DANTE_BUILD_VERSION ??
+      new Date()
+        .toISOString()
+        .replaceAll(/([:-])|(\.\d+Z$)/g, '')
+        .replace('T', '.'),
     logger,
     isProduction,
     root,
