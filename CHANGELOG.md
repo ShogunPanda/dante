@@ -1,3 +1,7 @@
+### 2026-09-29 / 0.63.0
+
+- feat: Support DANTE_BUILD_VERSION.
+
 ### 2026-09-18 / 0.62.3
 
 - fix: Added missing dependency.
