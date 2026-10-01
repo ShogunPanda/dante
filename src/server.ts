@@ -122,7 +122,9 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
 
   const server = fastify({
     https,
-    logger: logger ?? { transport: { target: 'pino-pretty' } },
+    // Fastify 5 accepts existing Pino loggers through loggerInstance, not logger.
+    loggerInstance: logger || undefined,
+    logger: logger === undefined && { transport: { target: 'pino-pretty' } },
     forceCloseConnections: true
   }) as unknown as FastifyInstance
 
