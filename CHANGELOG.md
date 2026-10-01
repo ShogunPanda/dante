@@ -1,3 +1,7 @@
+### 2026-10-01 / 2.0.1
+
+- fix: Fixed logger instantiation.
+
 ### 2026-09-29 / 0.63.0
 
 - feat: Support DANTE_BUILD_VERSION.
