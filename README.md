@@ -46,6 +46,7 @@ Once you have done editing, you should execute `dante build`. The website will b
 
 You can create a file `src/build/cli.ts` that should export a `setupCLI` function.
 The function will received a [commander](https://npm.im/commander) program and a [pino](https://getpino.io) logger in order to modify the Dante CLI.
+The function can be asynchronous. Dante waits for it to complete before parsing command-line arguments.
 
 ### Customize `create-dante-site`
 

@@ -13,7 +13,7 @@ import { localServer } from './server.ts'
 const logger = pino({ transport: { target: 'pino-pretty' } })
 const packageInfo = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'))
 
-let siteSetupCLI: ((program: Command, logger: Logger) => void) | null = null
+let siteSetupCLI: ((program: Command, logger: Logger) => void | Promise<void>) | null = null
 
 if (process.env.DANTE_CLI_PATH) {
   const imported = await import(resolve(rootDir, process.env.DANTE_CLI_PATH))
@@ -129,7 +129,7 @@ program
   })
 
 if (siteSetupCLI) {
-  siteSetupCLI(program, logger)
+  await siteSetupCLI(program, logger)
 }
 
 program.parse()
