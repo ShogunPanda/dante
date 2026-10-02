@@ -1,3 +1,7 @@
+### 2026-10-02 / 2.1.0
+
+- feat: Await CLI instantiation.
+
 ### 2026-10-01 / 2.0.1
 
 - fix: Fixed logger instantiation.
