@@ -1,22 +1,15 @@
 import type { AddressInfo } from 'node:net'
-import type { Command } from 'commander'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { program } from 'commander'
+import { program, type Command } from 'commander'
 import { pino, type Logger } from 'pino'
 import { builder } from './build.ts'
 import { downloadFonts } from './fonts.ts'
 import { activateDevelopmentServer } from './launcher.ts'
 import { createBuildContext, developmentServerActive, programDescription, programName, rootDir } from './models.ts'
 import { localServer } from './server.ts'
-
-// Make the skill readable even outside a site or when its CLI hook cannot load.
-if (process.argv.length === 3 && process.argv[2] === 'skills') {
-  process.stdout.write(readFileSync(new URL('../SKILL.md', import.meta.url)))
-} else {
-  await runCLI()
-}
+import { printSkill } from './skills.ts'
 
 async function runCLI(): Promise<void> {
   const logger = pino({ transport: { target: 'pino-pretty' } })
@@ -37,11 +30,10 @@ async function runCLI(): Promise<void> {
     })
 
   program
-    .command('skills')
-    .description('Print the Dante agent skill')
-    .action(() => {
-      process.stdout.write(readFileSync(new URL('../SKILL.md', import.meta.url)))
-    })
+    .command('skills [name]')
+    .description('Print an agent skill')
+    .option('--list', 'List available skill names')
+    .action(printSkill)
 
   program
     .command('development')
@@ -155,3 +147,5 @@ async function runCLI(): Promise<void> {
 
   await program.parseAsync()
 }
+
+await runCLI()

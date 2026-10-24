@@ -179,7 +179,7 @@ Run `npm run format`, `npm run typecheck`, and `npm run build` (which also runs 
 
 ## CLI reference
 
-- `dante skills`: print this entire file to stdout, without loading the site's CLI hook.
+- `dante skills`: print this entire file to stdout through the regular CLI flow.
 - `dante development` / `dev` / `d`: build, serve, and watch `src`; live-reload and build-status UI are injected during development.
 - `dante build` / `b`: produce a production export.
 - `dante server` / `serve` / `s`: serve an existing export without building.
@@ -248,7 +248,7 @@ export async function setupCLI(program: Command, logger: Logger): Promise<void> 
 }
 ```
 
-Plain `dante skills` bypasses this hook so the instructions remain accessible outside a site or when a site's hook is broken.
+All commands, including `skills`, load and await this hook before parsing arguments. Hook failures prevent command execution.
 
 ### Development state during CLI bootstrap
 
@@ -296,6 +296,26 @@ The example entry point sits beside the compiled hooks. All options are optional
 
 The launcher changes to `cwd` and replaces itself using `process.execve(process.execPath, ...)` with arrays and no shell. PID and standard file descriptors are preserved: signals and exit codes belong directly to the replacement process. It first preloads TSX without watch flags, then lets Commander parse the complete CLI after extensions register. For `development`/`dev`/`d`, the action replaces the process again with watch enabled after application `preAction` hooks execute. This correctly handles global extension options before the command and option values named `dev`. Help, version, and parse errors never activate watch. `watchPaths` supplements `src` and the legacy watch variables; array paths preserve spaces and commas. `nodeArgs` follows legacy Node flags; caller `process.execArgv` is not automatically forwarded into the initial CLI, while its configured Node flags are preserved on the development restart. Await the API once from a process entry point; successful replacement never returns or runs JavaScript cleanup/exit handlers, while preparation errors reject. External shell wrappers must still quote `"$@"` correctly themselves.
 
+### Additional skills for extending packages
+
+Configure skills in the executable's `launch` call, before application hooks load:
+
+```js
+await launch({
+  skills: {
+    default: 'freya',
+    files: {
+      freya: '/absolute/path/to/freya/SKILL.md',
+      themes: '/absolute/path/to/freya/THEMES.md'
+    }
+  }
+})
+```
+
+Both fields are optional. `default` is an existing skill ID, either `dante` or a name registered in `files`, selected when no name is supplied. Unknown default IDs are rejected during launcher validation. Without it, the default is Dante's skill. `files` adds named skills; `dante` is reserved and always available. Names are case-sensitive, start with a letter/digit, and otherwise contain only letters, digits, hyphens, or underscores. File paths must be absolute strings; convert package-relative URLs with `fileURLToPath(new URL('../SKILL.md', import.meta.url))`.
+
+`skills [name]` prints the exact selected file; `skills --list` lists available names one per line. A name cannot be combined with `--list`. Unknown names report available names on stderr and exit with code 1; file read errors also exit with code 1. These commands and `skills --help` follow the regular CLI flow, including application hooks and their failures. The launcher validates names and absolute paths but reads no skill files; files are opened only when selected. Configure skills through `launch`. Configuration survives the development watch restart, while a fresh `launch()` uses only its own skill configuration and the built-in Dante skill.
+
 ## Working on Dante itself
 
 - `src/cli.ts` defines commands and site-hook loading; `src/launcher.ts` provides the public launcher API and the internal development restart. `bin/dante` is a thin Node entry point. Preload is configured at startup; the development action enables watch through a second exec after parsing and application `preAction` hooks. Keep activation inside the action's `try` so preparation errors use the same logger/error handling as server startup and build.
@@ -303,4 +323,4 @@ The launcher changes to `cwd` and replaces itself using `process.execve(process.
 - Public APIs are re-exported from `src/index.ts`. Use explicit `.ts` imports in package sources and follow the existing formatting conventions.
 - `pnpm run ci` compiles TypeScript, copies `src/assets` into `dist`, and runs lint. `npm test` is a placeholder; do not add automated tests. Verify changed behavior with targeted manual checks.
 - Keep this skill and README synchronized with the implementation. Include this file in the npm package; `dante skills` must reproduce it exactly on stdout. `AGENTS.md` points here. Validate package contents with `npm pack --dry-run --ignore-scripts`.
-- For startup changes, check dev aliases and watch environment variables, production commands without watch mode, and TSX loading. For skill changes, check output both outside a project and with an invalid CLI hook override. For scaffolding changes, build the documented example and inspect its generated HTML/CSS.
+- For startup changes, check dev aliases and watch environment variables, production commands without watch mode, and TSX loading. For skill changes, check output and regular CLI hook execution, including propagation of hook failures. For scaffolding changes, build the documented example and inspect its generated HTML/CSS.

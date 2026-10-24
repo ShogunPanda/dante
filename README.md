@@ -21,7 +21,9 @@ Print the complete, self-contained Dante skill:
 npx @perseveranza-pets/dante skills
 ```
 
-The command writes [SKILL.md](./SKILL.md) to stdout; it does not install a skill or create a site. It also works outside a Dante project and bypasses the site's CLI customization hook.
+The command writes [SKILL.md](./SKILL.md) to stdout; it does not install a skill or create a site. It follows the regular CLI startup flow, including any configured CLI customization hook.
+
+Use `dante skills dante` to select the built-in skill explicitly, or `dante skills --list` to list available names. Packages extending Dante can supply additional skills and a different default through the launcher. Unknown names report the available skills on stderr and exit with code 1.
 
 Alternatively, install the skill with the [skills.sh](https://skills.sh) CLI:
 
@@ -159,7 +161,7 @@ export async function setupCLI(program: Command, logger: Logger): Promise<void> 
 }
 ```
 
-The hook is awaited before parsing arguments. Install `commander` and `pino` as direct dependencies when importing them in your project. Plain `dante skills` bypasses this hook.
+The hook is awaited before parsing arguments for all commands, including `skills`. A hook failure prevents command execution. Install `commander` and `pino` as direct dependencies when importing them in your project.
 
 ### Detecting the development process
 
@@ -220,6 +222,31 @@ The launcher changes to `cwd` and uses `process.execve` to replace itself with `
 Use `nodeArgs` for programmatic Node flags and standard `NODE_OPTIONS` from the shell. Caller `process.execArgv` is not automatically copied to the replacement process. `DANTE_NODE_ADDITIONAL_OPTIONS` remains supported but is deprecated: whitespace separates arguments; single/double quotes group them; backslash escapes the next character outside single quotes. Unclosed quotes or trailing escapes are errors. No globbing, variable expansion, or command substitution is performed. Legacy arguments precede explicit `nodeArgs`.
 
 `watchPaths` supplements the default `src` watch and the legacy watch environment variables. Array entries retain spaces and commas; the legacy `DANTE_WATCH_ADDITIONAL_PATHS` remains comma-separated. An external shell wrapper must still forward its own arguments correctly (`"$@"`) before Dante receives them.
+
+### Providing skills from another package
+
+Group skill configuration under the launcher's `skills` option:
+
+```js
+import { fileURLToPath } from 'node:url'
+import { launch } from '@perseveranza-pets/dante/launcher'
+
+await launch({
+  skills: {
+    default: 'freya',
+    files: {
+      freya: fileURLToPath(new URL('../SKILL.md', import.meta.url)),
+      themes: fileURLToPath(new URL('../THEMES.md', import.meta.url))
+    }
+  }
+})
+```
+
+Both fields are optional. `default` is the ID selected by `skills` without a name: it must be `dante` or a name registered in `files`. Unknown default IDs are rejected during launcher validation. `files` maps names to absolute file paths. Without `default`, Dante's skill is printed. The built-in name `dante` is always available and cannot be overridden. Additional names are case-sensitive, start with a letter or digit, and contain only letters, digits, hyphens, or underscores.
+
+For the example, `freya skills` prints the default file, `freya skills themes` prints the themes file, and `freya skills dante` still prints Dante's skill. `freya skills --list` lists names, one per line, without reading the files. A name and `--list` cannot be combined. Named/default skill output is the exact file contents, without headers.
+
+The launcher validates names and absolute paths before replacing the process. Files are read only when selected, so a missing optional skill does not prevent other commands from starting. Read errors go to stderr with exit code 1. Configure skills in the executable's `launch` call. Skill commands follow the regular CLI flow and load application hooks; hook failures propagate normally. The configuration is preserved across the development watch restart.
 
 ## Verification and contributing
 

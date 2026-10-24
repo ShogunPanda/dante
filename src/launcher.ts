@@ -1,5 +1,8 @@
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { validateSkills, type SkillsOptions } from './skills.ts'
+
+export type { SkillsOptions } from './skills.ts'
 
 export interface LaunchOptions {
   args?: string[]
@@ -10,6 +13,7 @@ export interface LaunchOptions {
   server?: string | URL
   cwd?: string
   env?: NodeJS.ProcessEnv
+  skills?: SkillsOptions
 }
 
 function resolvePath(value: string | URL, cwd: string): string {
@@ -74,6 +78,8 @@ export function launch(options: LaunchOptions = {}): Promise<void> {
     const args = options.args ?? process.argv.slice(2)
     const cwd = resolve(options.cwd ?? process.cwd())
     const env = { ...process.env, ...options.env }
+    validateSkills(options.skills ?? {})
+    env.DANTE_INTERNAL_SKILLS = JSON.stringify(options.skills ?? {})
 
     for (const [key, value] of [
       ['DANTE_CLI_PATH', options.cli],
