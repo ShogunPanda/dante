@@ -1,3 +1,7 @@
+### 2026-10-24 / 3.0.0
+
+- feat!: Improved CI and made it skills friendly.
+
 ### 2026-10-02 / 2.1.0
 
 - feat: Await CLI instantiation.
