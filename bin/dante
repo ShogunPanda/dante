@@ -1,5 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-ROOT=$(dirname $(realpath $0))
-DANTE_NODE_ARGS=$(node $ROOT/dante-args-parser.js $@)
-node $DANTE_NODE_ARGS $(realpath $ROOT/../dist/cli.js) $@
+import { launch } from '../dist/launcher.js'
+
+try {
+  await launch()
+} catch (error) {
+  console.error(error)
+  process.exitCode = 1
+}

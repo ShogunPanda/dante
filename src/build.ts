@@ -1,5 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { glob } from 'glob'
 import { transform } from 'oxc-transform'
 import { finalizePageCSS } from './css.ts'
@@ -41,7 +42,7 @@ export async function builder(context: BuildContext): Promise<void> {
     await mkdir(fullOutput, { recursive: true })
 
     // Perform the build
-    const { build }: { build: BuildFunction } = await import(buildFilePath())
+    const { build }: { build: BuildFunction } = await import(pathToFileURL(buildFilePath()).href)
     const { css, cssVisitor } = await build(context)
 
     // Now, for each generated page, replace the @import class with the production CSS

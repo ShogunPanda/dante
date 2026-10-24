@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url'
 
 export type Mode = 'development' | 'production'
 
+// True in the watched development process, including CLI setup; not a listening/readiness indicator.
+export const developmentServerActive = process.env.DANTE_INTERNAL_DEVELOPMENT === '1'
+
 export type ValueOrCallback<T> = T | ((context: BuildContext) => T | Promise<T>)
 
 export interface BuildContext {

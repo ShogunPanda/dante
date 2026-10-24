@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { Readable } from 'node:stream'
+import { pathToFileURL } from 'node:url'
 import fastifyStatic from '@fastify/static'
 import fastify from 'fastify'
 import { BAD_REQUEST, NOT_FOUND, NO_CONTENT, badRequestSchema } from 'http-errors-enhanced'
@@ -116,7 +117,7 @@ export async function localServer(options?: Partial<ServerOptions>): Promise<Fas
   let setupServer: ServerFunction | undefined
 
   if (existsSync(serverFilePath())) {
-    const serverExport = await import(serverFilePath())
+    const serverExport = await import(pathToFileURL(serverFilePath()).href)
     setupServer = serverExport.setupServer
   }
 

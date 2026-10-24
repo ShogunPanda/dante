@@ -1,3 +1,0 @@
-{
-  "extends": ["@cowtech/stylelint-config"]
-}
