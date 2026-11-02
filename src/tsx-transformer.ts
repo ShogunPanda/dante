@@ -6,10 +6,12 @@ import {
   type ResolveFnOutput,
   type ResolveHookContext
 } from 'node:module'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
+import { getTsconfig } from 'get-tsconfig'
 import { transformSync } from 'oxc-transform'
 
 const tsxCache: Record<string, string> = {}
+const tsconfigCache = new Map<string, unknown>()
 
 export function resolve(
   url: string,
@@ -37,9 +39,12 @@ export function load(
   }
 
   if (!tsxCache[url]) {
-    const result = transformSync(url, readFileSync(fileURLToPath(url), 'utf-8'), {
+    const path = fileURLToPath(url)
+    // Resolve inherited JSX settings per file; source pragmas still take precedence.
+    const config = getTsconfig(path, 'tsconfig.json', tsconfigCache)
+    const result = transformSync(url, readFileSync(path, 'utf-8'), {
       jsx: {
-        importSource: 'preact'
+        importSource: config?.config.compilerOptions?.jsxImportSource ?? 'preact'
       }
     })
 

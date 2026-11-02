@@ -130,7 +130,7 @@ Read CSS files yourself in the build function. `finalizePageCSS(context, html, c
 
 ### Rendering
 
-Dante accepts any renderer producing HTML. The skill contains a React SSR example. The TSX loader defaults to Preact: React TSX files must declare `/** @jsxImportSource react */` to use React's JSX runtime. Install the renderer and its runtime in the site. Dante does not automatically hydrate pages or bundle client-side JavaScript.
+Dante accepts any renderer producing HTML. The skill contains a React SSR example. The TSX loader reads `compilerOptions.jsxImportSource` from the nearest `tsconfig.json`, supporting JSONC and inherited settings through `extends`. A per-file `/** @jsxImportSource react */` directive takes precedence; without either setting, the runtime defaults to Preact. Configuration is cached for the process lifetime; restart development after changing a tsconfig. Install the selected runtime in the site, or use an installed package's runtime re-export such as `@perseveranza-pets/freya/preact`. Dante does not automatically hydrate pages or bundle client-side JavaScript.
 
 ## Custom server
 

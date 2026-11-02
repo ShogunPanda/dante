@@ -115,7 +115,7 @@ export function page(context: BuildContext): string {
 }
 ```
 
-The runtime TSX transformer defaults to Preact. Include `/** @jsxImportSource react */` in React TSX files; TypeScript's `jsx` configuration alone does not configure the runtime transformer. Use explicit `.tsx` imports. If a project chooses Preact or another renderer, use its matching runtime and server renderer consistently. Dante does not bundle browser JavaScript or automatically hydrate static HTML.
+The runtime TSX transformer reads `compilerOptions.jsxImportSource` from the nearest `tsconfig.json` for each TSX file, using `get-tsconfig` to support JSONC and `extends`. A per-file `/** @jsxImportSource react */` directive takes precedence over that setting; the fallback is `preact`. Configuration lookups are cached for the process lifetime, so restart development after changing a tsconfig. Use explicit `.tsx` imports. If a project chooses Preact or another renderer, use its matching runtime and server renderer consistently. Package runtime re-exports such as `@perseveranza-pets/freya/preact` are supported. Dante does not bundle browser JavaScript or automatically hydrate static HTML.
 
 There is no `prepareStyles` API or required style placeholder: return CSS from `build` and Dante injects it before each page's `</head>`.
 
