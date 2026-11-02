@@ -1,3 +1,7 @@
+### 2026-11-02 / 3.2.0
+
+- feat: Read JSX runtime from TypeScript configuration.
+
 ### 2026-10-24 / 3.1.0
 
 - feat: Support skills customizations.
